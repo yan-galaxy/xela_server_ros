@@ -1,0 +1,6 @@
+<launch>
+    <node pkg="threed_viz" type="subscriber_sensor" name="subscriber_sensor" output="screen" />
+
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find threed_viz)/config/arrow_rviz.rviz"/>
+
+</launch>

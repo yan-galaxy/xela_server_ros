@@ -1,0 +1,8 @@
+<launch>
+    <node pkg="sensor_brainco" type="release_brainco_pub" name="release_brainco_pub" output="screen" />
+
+    <node pkg="sensor_brainco" type="brainco_topic_proj" name="brainco_topic_proj" output="screen" />
+
+</launch>
+
+
