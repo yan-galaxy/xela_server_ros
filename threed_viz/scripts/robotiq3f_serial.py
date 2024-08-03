@@ -18,7 +18,7 @@ class Robotiq3f_Serial_Node:
         # 串口初始化
         try:
             self.ser = serial.Serial(self.port, baudrate=self.baudrate, timeout=self.timeout)
-            rospy.loginfo("robotiq串口已打开")
+            # rospy.loginfo("robotiq串口已打开")
         except SerialException as e:
             rospy.logerr("无法打开robotiq串口: %s", e)
 
@@ -48,9 +48,10 @@ class Robotiq3f_Serial_Node:
         self.ctrl_data[11]=msg.speed  #speed
         self.ctrl_data[12]=msg.force  #current
 
-        self.modbus_frame_ctrl = self.build_modbus_frame(self.ctrl_data)
-
-        self.ctrl_command = 1 ;
+        if msg.command == 1:
+            # print("get")
+            self.modbus_frame_ctrl = self.build_modbus_frame(self.ctrl_data)
+            self.ctrl_command = 1 ;
         
         # rospy.loginfo("订阅到消息: %d %d %d", msg.position,msg.speed,msg.force)
 
@@ -59,9 +60,10 @@ class Robotiq3f_Serial_Node:
         while not rospy.is_shutdown():
             if self.ser.isOpen():
                 try:
-                    # start_time = time.perf_counter()# 循环开始计时
+                    start_time = time.perf_counter()# 循环开始计时
 
                     if self.ctrl_command :
+                        # print("get")
                         self.ser.write(self.modbus_frame_ctrl)
                         # 接收数据
                         received_ctrl = self.ser.read(8)#ser.inWaiting()
@@ -88,8 +90,8 @@ class Robotiq3f_Serial_Node:
                     self.fd_pub.publish(self.feedback_msg)
                     # rospy.loginfo("发布数据: %d", 123)
 
-                    # end_time = time.perf_counter()
-                    # elapsed_time = end_time - start_time
+                    end_time = time.perf_counter()
+                    elapsed_time = end_time - start_time
                     # print(f"robotiq循环耗时:{elapsed_time*1000.0:.3f} ms")
 
                     # rate.sleep()

@@ -7,6 +7,7 @@
 #include "sensor_brainco/stm32data.h"
 threed_viz::robotiq3fctrl robotiq_Ctrl_msg;
 sensor_brainco::stm32data stm32data_msg;
+volatile uint8_t ctrl_command;
 typedef struct
 {
     double x;
@@ -57,15 +58,27 @@ void robotiq_Ctrl_pub(ros::Publisher pub,ros::Rate rosrate)//向brainco请求反
     {
         // ROS_INFO("send");
         // 发布消息
-		pub.publish(robotiq_Ctrl_msg);
+        pub.publish(robotiq_Ctrl_msg);
+        robotiq_Ctrl_msg.command=0;
+
         // 按照循环频率延时
         rosrate.sleep();
     }
 }
-void main_proj()//向brainco请求反馈数据,然后发布反馈数据fb
+void robotiq_Ctrl_Once(uint8_t pos,uint8_t spe,uint8_t cur)
+{
+    robotiq_Ctrl_msg.position=pos;
+    robotiq_Ctrl_msg.speed=spe;
+    robotiq_Ctrl_msg.force=cur;
+    robotiq_Ctrl_msg.command=1;
+}
+void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反馈数据fb
 {
     uint8_t run_stat=0;
+    sleep(1);
+    robotiq_Ctrl_Once(70,20,0);
     sleep(2);
+    robotiq_Ctrl_Once(0,20,0);
     while(ros::ok())
     { 
         switch(run_stat)
@@ -129,11 +142,11 @@ int main( int argc, char** argv )
     ros::Subscriber sub1 = n1.subscribe("xServTopic", 1000, xsen_callback);
     ros::Subscriber sub2 = n2.subscribe("stm32data_info", 1000, stm32sen_callback);
     ros::Publisher robotiq_Ctrl_info_pub = n3.advertise<threed_viz::robotiq3fctrl>("/robotiq3fctrl", 10);
-    ros::Rate loop_rate_pub(40);
+    ros::Rate loop_rate_pub(200);
     
     std::thread ros_robotiq_Ctrl_pub_thread(robotiq_Ctrl_pub,robotiq_Ctrl_info_pub,loop_rate_pub); 
     
-    std::thread main_proj_thread(main_proj);
+    std::thread main_proj_thread(main_proj,robotiq_Ctrl_info_pub);
 
     ros::spin();
 }
