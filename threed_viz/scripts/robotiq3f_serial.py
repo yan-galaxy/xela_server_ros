@@ -44,7 +44,7 @@ class Robotiq3f_Serial_Node:
         # 定义回调函数
         # self.callback()
 
-    def callback(self):
+    def proc(self):
         rate = rospy.Rate(100)  # 10Hz
         while not rospy.is_shutdown():
             if self.ser.isOpen():
@@ -108,7 +108,7 @@ class Robotiq3f_Serial_Node:
 if __name__ == '__main__':
     try:
         robotiq_node = Robotiq3f_Serial_Node()
-        robotiq_node.callback()
+        robotiq_node.proc()
         rospy.spin()
     except rospy.ROSInterruptException:
         pass
