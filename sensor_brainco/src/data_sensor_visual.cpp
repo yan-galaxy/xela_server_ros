@@ -230,7 +230,24 @@ void serial_callback(char* data,int length)
 //开启stm32串口接收
 void serial_proj(WzSerialportPlus WzSerialport)
 {
-    if(WzSerialport.open("/dev/ttyUSB2",921600,1,8,'n'))
+    ros::NodeHandle nh;
+    
+    int baudrate;
+
+    std::string port_string;
+    std::string default_port = "/dev/ttyUSB1";
+    // 尝试获取参数，如果不存在，则使用默认值
+    if (!nh.getParam("~port", port_string)) {
+    ROS_WARN("Parameter 'port' not found, using default value '%s'.", default_port.c_str());
+    port_string = default_port;
+    }
+
+    if (!nh.getParam("~baudrate", baudrate)) {
+    ROS_WARN("Parameter 'baudrate' not found, using default value '%d'.", baudrate);
+    baudrate = 921600;
+    }
+    // nh.getParam("port", port_string, std::string("/dev/ttyUSB1"));
+    if(WzSerialport.open(port_string,baudrate,1,8,'n'))
     {
         getchar();
         WzSerialport.close();
