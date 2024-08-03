@@ -1,12 +1,11 @@
 #!/usr/bin/env python
-
 import rospy
 import time
 import serial
 from serial import SerialException
 from threed_viz.msg import robotiq3fctrl
 from threed_viz.msg import robotiq3f_feedback
-
+import threading
 
 class Robotiq3f_Serial_Node:
     def __init__(self):
@@ -27,7 +26,7 @@ class Robotiq3f_Serial_Node:
         self.request_data = bytearray([0x09,0x03,0x07,0xD2,0x00,0x04])
         self.ctrl_data=bytearray([0x09, 0x10, 0x03,0xE8,0x00,0x03,0x06,0x09,0x00,0x00,0x00,0x00,0x00])
         self.ctrl_data[10]=0  #postion
-        self.ctrl_data[11]=20  #speed
+        self.ctrl_data[11]=0  #speed
         self.ctrl_data[12]=0  #current
 
         self.recv_request = b''
@@ -35,52 +34,65 @@ class Robotiq3f_Serial_Node:
         self.modbus_frame_ctrl = self.build_modbus_frame(self.ctrl_data)
         self.modbus_frame_req = self.build_modbus_frame(self.request_data)
 
+        self.ctrl_command = 0;
+
+        self.ctrl_sub = rospy.Subscriber('/robotiq3fctrl', robotiq3fctrl, self.ctrl_callback)
+        self.fd_pub = rospy.Publisher("/robotiq3f_feedback", robotiq3f_feedback, queue_size=10)
+
+        self.feedback_msg=robotiq3f_feedback()#反馈的消息变量
+        self.ctrl_msg=robotiq3fctrl()#控制的消息变量
+
+    def ctrl_callback(self, msg):#控制消息订阅回调函数
+
+        self.ctrl_data[10]=msg.position  #postion
+        self.ctrl_data[11]=msg.speed  #speed
+        self.ctrl_data[12]=msg.force  #current
+
+        self.modbus_frame_ctrl = self.build_modbus_frame(self.ctrl_data)
+
+        self.ctrl_command = 1 ;
         
-        # 定义发布者
-        self.pub = rospy.Publisher("/robotiq3f_feedback", robotiq3f_feedback, queue_size=10)
-
-        self.feedback=robotiq3f_feedback()#反馈的消息变量
-
-        # 定义回调函数
-        # self.callback()
+        # rospy.loginfo("订阅到消息: %d %d %d", msg.position,msg.speed,msg.force)
 
     def proc(self):
         rate = rospy.Rate(100)  # 10Hz
         while not rospy.is_shutdown():
             if self.ser.isOpen():
                 try:
-                    start_time = time.perf_counter()
+                    # start_time = time.perf_counter()# 循环开始计时
 
-                    self.ser.write(self.modbus_frame_ctrl)
-                    # 接收数据
-                    received_ctrl = self.ser.read(8)#ser.inWaiting()
-                    # print(f"ctrl接收到的数据:{received_ctrl.hex()}")
+                    if self.ctrl_command :
+                        self.ser.write(self.modbus_frame_ctrl)
+                        # 接收数据
+                        received_ctrl = self.ser.read(8)#ser.inWaiting()
+                        if not received_ctrl:  # 如果received_req为空字节串
+                            rospy.loginfo("ctrl没有接收到数据")
+                        # print(f"ctrl接收到的数据:{received_ctrl.hex()}")
+                        self.ctrl_command = 0
 
                     self.ser.write(self.modbus_frame_req)
                     # 接收数据
                     received_req = self.ser.read(13)#ser.inWaiting()
-                    # print(f"req接收到的数据:{received_req.hex()}")
-
-                    self.feedback.A_position=received_req[3]
-                    self.feedback.A_current=received_req[4]
-                    self.feedback.B_position=received_req[6]
-                    self.feedback.B_current=received_req[7]
-                    self.feedback.C_position=received_req[9]
-                    self.feedback.C_current=received_req[10]
+                    if not received_req:  # 如果received_req为空字节串
+                        rospy.loginfo("req没有接收到数据")
+                    else:
+                        # print(f"req接收到的数据:{received_req.hex()}")
+                        self.feedback_msg.A_position = received_req[3]
+                        self.feedback_msg.A_current  = received_req[4]
+                        self.feedback_msg.B_position = received_req[6]
+                        self.feedback_msg.B_current  = received_req[7]
+                        self.feedback_msg.C_position = received_req[9]
+                        self.feedback_msg.C_current  = received_req[10]
                     
-                    # 将接收到的数据转换为消息并发布
+                    # 发布
+                    self.fd_pub.publish(self.feedback_msg)
+                    # rospy.loginfo("发布数据: %d", 123)
 
-                    # data_str = recv_request.hex()  # 假设使用十六进制字符串作为消息内容
-                    # data_msg = String()
-                    # data_msg.data = data_str
-                    # self.pub.publish(data_msg)
-                    rospy.loginfo("发布数据: %d", 123)
+                    # end_time = time.perf_counter()
+                    # elapsed_time = end_time - start_time
+                    # print(f"robotiq循环耗时:{elapsed_time*1000.0:.3f} ms")
 
-                    end_time = time.perf_counter()
-                    elapsed_time = end_time - start_time
-                    print(f"循环耗时：{elapsed_time} 秒")
-
-                    rate.sleep()
+                    # rate.sleep()
                     
                 except SerialException as e:
                     rospy.logerr("robotiq串口通信错误: %s", e)
@@ -108,7 +120,10 @@ class Robotiq3f_Serial_Node:
 if __name__ == '__main__':
     try:
         robotiq_node = Robotiq3f_Serial_Node()
-        robotiq_node.proc()
+
+        # 启动串口处理循环
+        threading.Thread(target=robotiq_node.proc).start()
+        # robotiq_node.proc()
         rospy.spin()
     except rospy.ROSInterruptException:
         pass

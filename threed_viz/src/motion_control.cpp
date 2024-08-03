@@ -50,14 +50,14 @@ void xsen_callback(const xela_server_ros::SensStream::ConstPtr& msg)
 void robotiq_Ctrl_pub(ros::Publisher pub,ros::Rate rosrate)//向brainco请求反馈数据,然后发布反馈数据fb
 {
     robotiq_Ctrl_msg.position=0;
-    robotiq_Ctrl_msg.speed=0;
+    robotiq_Ctrl_msg.speed=20;
     robotiq_Ctrl_msg.force=0;
     
     while(ros::ok())
     {
         // ROS_INFO("send");
         // 发布消息
-		// pub.publish(robotiq_Ctrl_msg);
+		pub.publish(robotiq_Ctrl_msg);
         // 按照循环频率延时
         rosrate.sleep();
     }
@@ -129,7 +129,7 @@ int main( int argc, char** argv )
     ros::Subscriber sub1 = n1.subscribe("xServTopic", 1000, xsen_callback);
     ros::Subscriber sub2 = n2.subscribe("stm32data_info", 1000, stm32sen_callback);
     ros::Publisher robotiq_Ctrl_info_pub = n3.advertise<threed_viz::robotiq3fctrl>("/robotiq3fctrl", 10);
-    ros::Rate loop_rate_pub(100);
+    ros::Rate loop_rate_pub(40);
     
     std::thread ros_robotiq_Ctrl_pub_thread(robotiq_Ctrl_pub,robotiq_Ctrl_info_pub,loop_rate_pub); 
     
