@@ -24,17 +24,50 @@ class Robotiq3f_Serial_Node:
 
         # 发送的数据，这里是一个示例二进制数据
         self.request_data = bytearray([0x09,0x03,0x07,0xD2,0x00,0x04])
-        self.ctrl_data=bytearray([0x09, 0x10, 0x03,0xE8,0x00,0x03,0x06,0x09,0x00,0x00,0x00,0x00,0x00])
+        self.ctrl_data = bytearray([0x09, 0x10, 0x03,0xE8,0x00,0x03,0x06,0x09,0x00,0x00,0x00,0x00,0x00])
+        # 0x09 SlaveID 
+        # 0x10 Function Code 
+        # 0x03,0xE8 address 
+        # 0x00,0x03 num to write to 
+        # 0x06 num of write bytes 
+
+        # 0x09,0x00 write to 03E9  
+        # 第一个字节 Register: ACTION REQUEST    4:rATR      3:rGTO 2-1:rMOD 0:rACT 
+        # rATR: 0: normal     1: Emergency auto-release
+        # rGTO: 0: stop       1: move
+        # rACT: 0: deactivate 1: activate
+        # 第二个字节 Register: GRIPPER OPTION 1 
+
+        # 0x00,0x00 write to 03EA  后一个字节是位置
+        # 0x00,0x00 write to 03EB  速度和力
+
         self.ctrl_data[10]=0  #postion
         self.ctrl_data[11]=0  #speed
         self.ctrl_data[12]=0  #current
+
+
+        self.stop_data = bytearray([0x09, 0x10, 0x03,0xE8,0x00,0x01,0x02,0x01,0x00])
+        # 0x09 SlaveID 
+        # 0x10 Function Code 
+        # 0x03,0xE8 address 
+        # 0x00,0x01 num to write to 
+        # 0x02 num of write bytes 
+
+        # 0x01,0x00 write to 03E9  
+        # 第一个字节 Register: ACTION REQUEST    4:rATR      3:rGTO 2-1:rMOD 0:rACT 
+        # rATR: 0: normal     1: Emergency auto-release
+        # rGTO: 0: stop       1: move
+        # rACT: 0: deactivate 1: activate
+        # 第二个字节 Register: GRIPPER OPTION 1 
 
         self.recv_request = b''
         # 构建Modbus RTU帧
         self.modbus_frame_ctrl = self.build_modbus_frame(self.ctrl_data)
         self.modbus_frame_req = self.build_modbus_frame(self.request_data)
+        self.modbus_frame_stop = self.build_modbus_frame(self.stop_data)
 
         self.ctrl_command = 0;
+        self.stop_command = 0;
 
         self.ctrl_sub = rospy.Subscriber('/robotiq3fctrl', robotiq3fctrl, self.ctrl_callback)
         self.fd_pub = rospy.Publisher("/robotiq3f_feedback", robotiq3f_feedback, queue_size=10)
@@ -52,6 +85,8 @@ class Robotiq3f_Serial_Node:
             # print("get")
             self.modbus_frame_ctrl = self.build_modbus_frame(self.ctrl_data)
             self.ctrl_command = 1 ;
+            if msg.stop ==1 :
+                self.stop_command = 1 ;
         
         # rospy.loginfo("订阅到消息: %d %d %d", msg.position,msg.speed,msg.force)
 
@@ -64,12 +99,22 @@ class Robotiq3f_Serial_Node:
 
                     if self.ctrl_command :
                         # print("get")
-                        self.ser.write(self.modbus_frame_ctrl)
-                        # 接收数据
-                        received_ctrl = self.ser.read(8)#ser.inWaiting()
-                        if not received_ctrl:  # 如果received_req为空字节串
-                            rospy.loginfo("ctrl没有接收到数据")
-                        # print(f"ctrl接收到的数据:{received_ctrl.hex()}")
+                        if self.stop_command == 0 :
+                            self.ser.write(self.modbus_frame_ctrl)
+                            received_ctrl = self.ser.read(8)#ser.inWaiting() 接收数据
+                            if not received_ctrl:  # 如果received_req为空字节串
+                                rospy.loginfo("ctrl没有接收到数据")
+                            # print(f"ctrl接收到的数据:{received_ctrl.hex()}")
+
+                        else :# 接收到停止命令
+                            # print("stop")
+                            self.ser.write(self.modbus_frame_stop)
+                            received_ctrl = self.ser.read(8)#ser.inWaiting() 接收数据
+                            if not received_ctrl:  # 如果received_req为空字节串
+                                rospy.loginfo("stop没有接收到数据")
+                            # print(f"stop接收到的数据:{received_ctrl.hex()}")
+                            self.stop_command = 0 
+
                         self.ctrl_command = 0
 
                     self.ser.write(self.modbus_frame_req)
