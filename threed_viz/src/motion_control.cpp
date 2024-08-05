@@ -46,6 +46,7 @@ void xsen_callback(const xela_server_ros::SensStream::ConstPtr& msg)
     // std::cout << "Current time: " << time_buffer << std::endl; // 打印格式化的时间字符串
     std::string time_str = time_buffer;
     // std::string time_str = timeToString(ros::Time::now());
+
     // 遍历所有传感器数据
     for (const auto& sensor : msg->sensors)
     {
@@ -135,19 +136,22 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
                 {
                     ROS_INFO("touch");
                     // robotiq_stop();
-                    robotiq_Ctrl_Once(robotiq3f_feedback_msg.A_position,10,0);//停止闭合
+                    robotiq_Ctrl_Once(robotiq3f_feedback_msg.A_position+5,50,0);//停止闭合
                     run_stat=1;
                 }
                 break;
 
             case 1:
-                sleep(2);
-                robotiq_Ctrl_Once(0,20,0);
-                ROS_INFO("release");
+                sleep(15);
+                ROS_INFO("down");
                 run_stat=2;
                 break;
 
             case 2:
+                sleep(10);
+                robotiq_Ctrl_Once(0,20,0);
+                ROS_INFO("release");
+                run_stat=3;
                 break;
 
             case 3:
@@ -183,6 +187,9 @@ int main( int argc, char** argv )
     ros::init(argc, argv, "motion_control");
 
     ros::NodeHandle n1,n2,n3;
+    clearFileContent("/home/galaxy/Desktop/Xela_ws/src/threed_viz/data/xela_x.txt");
+    clearFileContent("/home/galaxy/Desktop/Xela_ws/src/threed_viz/data/xela_y.txt");
+    clearFileContent("/home/galaxy/Desktop/Xela_ws/src/threed_viz/data/xela_z.txt");
 
     ros::Subscriber sub1 = n1.subscribe("xServTopic", 1000, xsen_callback);
     ros::Subscriber sub2 = n2.subscribe("stm32data_info", 1000, stm32sen_callback);
