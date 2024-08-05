@@ -63,7 +63,12 @@ add_executable(serial_robotiq3f ${SRC_LIST})
 target_link_libraries(serial_robotiq3f ${catkin_LIBRARIES} )
 add_dependencies(serial_robotiq3f ${PROJECT_NAME}_gencpp)# 链接自定义消息必须添加的
 
-add_executable(motion_control src/motion_control.cpp)
+file(
+GLOB MOTION_SRC_LIST 
+${CMAKE_CURRENT_SOURCE_DIR}/src/draw_chart.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/src/motion_control.cpp
+)
+add_executable(motion_control ${MOTION_SRC_LIST})
 target_link_libraries(motion_control ${catkin_LIBRARIES})# 主流程运动控制
 add_dependencies(motion_control ${PROJECT_NAME}_gencpp)# 链接自定义消息必须添加的
 #############

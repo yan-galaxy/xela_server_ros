@@ -5,6 +5,8 @@
 
 #include <vector>
 #include "draw_chart.h"
+#include <ctime>
+
 
 #include "threed_viz/robotiq3fctrl.h" 
 #include "threed_viz/robotiq3f_feedback.h" 
@@ -34,6 +36,16 @@ void stm32sen_callback(const sensor_brainco::stm32data::ConstPtr& msg)
 }
 void xsen_callback(const xela_server_ros::SensStream::ConstPtr& msg)
 {
+    // 获取系统当前时间的Unix时间戳
+    time_t now = time(NULL);
+
+    struct tm *timeinfo = localtime(&now); // 将 time_t 转换为 tm 结构，本地时间
+
+    char time_buffer[80]; // 创建一个字符数组作为缓冲区
+    strftime(time_buffer, sizeof(time_buffer), "%Y-%m-%d %H:%M:%S", timeinfo); // 使用特定格式填充缓冲区
+    // std::cout << "Current time: " << time_buffer << std::endl; // 打印格式化的时间字符串
+    std::string time_str = time_buffer;
+    // std::string time_str = timeToString(ros::Time::now());
     // 遍历所有传感器数据
     for (const auto& sensor : msg->sensors)
     {
@@ -54,9 +66,12 @@ void xsen_callback(const xela_server_ros::SensStream::ConstPtr& msg)
         sen_all.x=sen_temp.x;
         sen_all.y=sen_temp.y;
         sen_all.z=sen_temp.z;
-        SensorX[0]=sen_all.x;
-        SensorY[0]=sen_all.y;
-        SensorZ[0]=sen_all.z;
+        // SensorX[0]=sen_all.x;
+        // SensorY[0]=sen_all.y;
+        // SensorZ[0]=sen_all.z;
+        saveDataToFile("/home/galaxy/Desktop/Xela_ws/src/threed_viz/data/xela_x.txt", sen_all.x);
+        saveDataToFile("/home/galaxy/Desktop/Xela_ws/src/threed_viz/data/xela_y.txt", sen_all.y);
+        saveDataToFile("/home/galaxy/Desktop/Xela_ws/src/threed_viz/data/xela_z.txt", sen_all.z);
         sen_all.len=std::sqrt(sen_all.x * sen_all.x + sen_all.y * sen_all.y + sen_all.z * sen_all.z);
         // ROS_INFO("ALL X: %f, Y: %f, Z: %f,len: %f",sen_all.x ,sen_all.y ,sen_all.z,sen_all.len);
     }
@@ -109,6 +124,7 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
     robotiq_Ctrl_Once(0,20,0);
     sleep(3);
     robotiq_Ctrl_Once(105,10,0);//合拢
+    ROS_INFO("motion");
     while(ros::ok())
     { 
         switch(run_stat)
@@ -125,6 +141,10 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
                 break;
 
             case 1:
+                sleep(2);
+                robotiq_Ctrl_Once(0,20,0);
+                ROS_INFO("release");
+                run_stat=2;
                 break;
 
             case 2:
@@ -173,6 +193,6 @@ int main( int argc, char** argv )
     std::thread ros_robotiq_Ctrl_pub_thread(robotiq_Ctrl_pub,robotiq_Ctrl_info_pub,loop_rate_pub); 
     
     std::thread main_proj_thread(main_proj,robotiq_Ctrl_info_pub);
-
+    
     ros::spin();
 }
