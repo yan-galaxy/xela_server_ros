@@ -18,12 +18,6 @@ if len(sys.argv) > 1:
         "/home/galaxy/Desktop/Xela_ws/src/threed_viz/storage_data/"+ sys.argv[1] +"/xela_y.txt",#8是一直在滑动，上升速度为3
         "/home/galaxy/Desktop/Xela_ws/src/threed_viz/storage_data/"+ sys.argv[1] +"/xela_z.txt"
     ] 
-    #西柚汁
-    #12 滑动 上升速度3
-    #13 +1更紧地滑动 上升速度3
-    #14 +3更紧地滑动 上升速度3
-    #15 +5不滑动 上升速度3
-    
 else:#没有输入参数 原路径
     file_paths = [
         "/home/galaxy/Desktop/Xela_ws/src/threed_viz/data/xela_x.txt",

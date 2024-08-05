@@ -136,7 +136,7 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
                 {
                     ROS_INFO("touch");
                     // robotiq_stop();
-                    robotiq_Ctrl_Once(robotiq3f_feedback_msg.A_position+5,50,0);//停止闭合
+                    robotiq_Ctrl_Once(robotiq3f_feedback_msg.A_position+3,50,0);//停止闭合
                     run_stat=1;
                 }
                 break;
