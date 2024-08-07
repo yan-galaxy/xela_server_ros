@@ -6,7 +6,7 @@
 #include <vector>
 #include "draw_chart.h"
 #include <ctime>
-
+#include <cmath>
 
 #include "threed_viz/robotiq3fctrl.h" 
 #include "threed_viz/robotiq3f_feedback.h" 
@@ -27,12 +27,70 @@ typedef struct
     double z;
     double len;
 }SEN_COO;
+// 定义一阶巴特沃斯高通滤波器
+class ButterworthHighPassFilter {
+public:
+    ButterworthHighPassFilter(double cutoffFreq, double sampleRate)
+        : cutoffFreq(cutoffFreq), sampleRate(sampleRate), prevInput(0.0), prevOutput(0.0) {
+        double RC = 1.0 / (cutoffFreq * 2 * M_PI);
+        double dt = 1.0 / sampleRate;
+        alpha = dt / (RC + dt);
+    }
+
+    double filter(double input) {
+        double output = alpha * (prevOutput + input - prevInput);
+        prevInput = input;
+        prevOutput = output;
+        return output;
+    }
+
+private:
+    double cutoffFreq;
+    double sampleRate;
+    double alpha;
+    double prevInput;
+    double prevOutput;
+};
 SEN_COO sen_coo[16];
 SEN_COO sen_all;
+ButterworthHighPassFilter filter_x(5.0, 100.0);
+ButterworthHighPassFilter filter_y(5.0, 100.0);
+ButterworthHighPassFilter filter_z(5.0, 100.0);
+double sen_filter_x;
+double sen_filter_y;
+double sen_filter_z;
+
+ButterworthHighPassFilter filter_3(5.0, 100.0);
+ButterworthHighPassFilter filter_5(5.0, 100.0);
+ButterworthHighPassFilter filter_10(5.0, 100.0);
+ButterworthHighPassFilter filter_11(5.0, 100.0);
+double stm32filter_3;
+double stm32filter_5;
+double stm32filter_10;
+double stm32filter_11;
+
+std::string savepath = "/home/galaxy/Desktop/Xela_ws/src/threed_viz/data/";
+
+
 void stm32sen_callback(const sensor_brainco::stm32data::ConstPtr& msg)
 {
     memcpy(&stm32data_msg,msg.get(),128);
     // ROS_INFO("10:%4d,11:%4d,3:%4d,5:%4d",stm32data_msg.voltage[10],stm32data_msg.voltage[11],stm32data_msg.voltage[3],stm32data_msg.voltage[5]);
+    stm32filter_3=filter_3.filter(stm32data_msg.voltage[3]);
+    stm32filter_5=filter_5.filter(stm32data_msg.voltage[5]);
+    stm32filter_10=filter_10.filter(stm32data_msg.voltage[10]);
+    stm32filter_11=filter_11.filter(stm32data_msg.voltage[11]);
+    
+    saveDataToFile(savepath+"stm32raw3.txt", stm32data_msg.voltage[3]);
+    saveDataToFile(savepath+"stm32raw5.txt", stm32data_msg.voltage[5]);
+    saveDataToFile(savepath+"stm32raw10.txt", stm32data_msg.voltage[10]);
+    saveDataToFile(savepath+"stm32raw11.txt", stm32data_msg.voltage[11]);
+
+    saveDataToFile(savepath+"stm32fil3.txt", stm32filter_3);
+    saveDataToFile(savepath+"stm32fil5.txt", stm32filter_5);
+    saveDataToFile(savepath+"stm32fil10.txt", stm32filter_10);
+    saveDataToFile(savepath+"stm32fil11.txt", stm32filter_11);
+
 }
 void xsen_callback(const xela_server_ros::SensStream::ConstPtr& msg)
 {
@@ -67,12 +125,15 @@ void xsen_callback(const xela_server_ros::SensStream::ConstPtr& msg)
         sen_all.x=sen_temp.x;
         sen_all.y=sen_temp.y;
         sen_all.z=sen_temp.z;
-        // SensorX[0]=sen_all.x;
-        // SensorY[0]=sen_all.y;
-        // SensorZ[0]=sen_all.z;
-        saveDataToFile("/home/galaxy/Desktop/Xela_ws/src/threed_viz/data/xela_x.txt", sen_all.x);
-        saveDataToFile("/home/galaxy/Desktop/Xela_ws/src/threed_viz/data/xela_y.txt", sen_all.y);
-        saveDataToFile("/home/galaxy/Desktop/Xela_ws/src/threed_viz/data/xela_z.txt", sen_all.z);
+        sen_filter_x=filter_x.filter(sen_all.x);
+        sen_filter_y=filter_y.filter(sen_all.y);
+        sen_filter_z=filter_z.filter(sen_all.z);
+        saveDataToFile(savepath+"xela_x.txt", sen_all.x);
+        saveDataToFile(savepath+"xela_y.txt", sen_all.y);
+        saveDataToFile(savepath+"xela_z.txt", sen_all.z);
+        saveDataToFile(savepath+"filter_x.txt", sen_filter_x);
+        saveDataToFile(savepath+"filter_y.txt", sen_filter_y);
+        saveDataToFile(savepath+"filter_z.txt", sen_filter_z);
         sen_all.len=std::sqrt(sen_all.x * sen_all.x + sen_all.y * sen_all.y + sen_all.z * sen_all.z);
         // ROS_INFO("ALL X: %f, Y: %f, Z: %f,len: %f",sen_all.x ,sen_all.y ,sen_all.z,sen_all.len);
     }
@@ -131,12 +192,12 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
         switch(run_stat)
         {
             case 0:
-                if(sen_all.z>0.4 && ( (stm32data_msg.diff[3]<-30)||(stm32data_msg.diff[5]<-30)   
+                if(sen_filter_z>0.1 && ( (stm32data_msg.diff[3]<-30)||(stm32data_msg.diff[5]<-30)   
                 ||(stm32data_msg.diff[10]<-30)||(stm32data_msg.diff[11]<-30) ) )//三个手指都接触
                 {
                     ROS_INFO("touch");
                     // robotiq_stop();
-                    robotiq_Ctrl_Once(robotiq3f_feedback_msg.A_position+3,50,0);//停止闭合
+                    robotiq_Ctrl_Once(robotiq3f_feedback_msg.A_position+6,50,0);//停止闭合
                     run_stat=1;
                 }
                 break;
@@ -187,9 +248,21 @@ int main( int argc, char** argv )
     ros::init(argc, argv, "motion_control");
 
     ros::NodeHandle n1,n2,n3;
-    clearFileContent("/home/galaxy/Desktop/Xela_ws/src/threed_viz/data/xela_x.txt");
-    clearFileContent("/home/galaxy/Desktop/Xela_ws/src/threed_viz/data/xela_y.txt");
-    clearFileContent("/home/galaxy/Desktop/Xela_ws/src/threed_viz/data/xela_z.txt");
+    clearFileContent(savepath+"xela_x.txt");
+    clearFileContent(savepath+"xela_y.txt");
+    clearFileContent(savepath+"xela_z.txt");
+    clearFileContent(savepath+"filter_x.txt");
+    clearFileContent(savepath+"filter_y.txt");
+    clearFileContent(savepath+"filter_z.txt");
+
+    clearFileContent(savepath+"stm32raw3.txt");
+    clearFileContent(savepath+"stm32raw5.txt");
+    clearFileContent(savepath+"stm32raw10.txt");
+    clearFileContent(savepath+"stm32raw11.txt");
+    clearFileContent(savepath+"stm32fil3.txt");
+    clearFileContent(savepath+"stm32fil5.txt");
+    clearFileContent(savepath+"stm32fil10.txt");
+    clearFileContent(savepath+"stm32fil11.txt");
 
     ros::Subscriber sub1 = n1.subscribe("xServTopic", 1000, xsen_callback);
     ros::Subscriber sub2 = n2.subscribe("stm32data_info", 1000, stm32sen_callback);

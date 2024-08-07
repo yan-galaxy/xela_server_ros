@@ -62,14 +62,13 @@ filtered_dataz = highpass_filter(dataz, fs=100, cutoff=5)
 filtered_datax = highpass_filter(datax, fs=100, cutoff=5)
 
 # 创建一个新的图和子图
-fig = plt.figure()
-fig.canvas.manager.set_window_title("raw")
-ax = fig.add_subplot(111, projection='3d')
+fig = plt.figure(figsize=(12, 6))
+fig.canvas.manager.set_window_title("Raw and Filtered Data")
 
-# 为了绘制三维图，我们需要x, y, z坐标
-# 这里我们使用数据索引作为x坐标，不同的y坐标来区分数据组
+# 第一个子图：原始数据
+ax1 = fig.add_subplot(121, projection='3d')
 x = np.arange(len(datax))
-y1, y2, y3,y4 ,y5 = np.full_like(x, 1), np.full_like(x, 2), np.full_like(x, 2), np.full_like(x, 4), np.full_like(x, 5)
+y1, y2, y3, y4, y5 = np.full_like(x, 1), np.full_like(x, 2), np.full_like(x, 2), np.full_like(x, 4), np.full_like(x, 5)
 
 
 # 定义每组数据的颜色  可以是颜色名称、十六进制颜色代码或颜色元组  
@@ -77,35 +76,27 @@ y1, y2, y3,y4 ,y5 = np.full_like(x, 1), np.full_like(x, 2), np.full_like(x, 2), 
 # ADD8E6 lightblue 浅蓝色  87CEEB skyblue   6495ED cornflowerblue
 # 90EE90 lightgreen 浅绿色    66CD00
 # FFB6C1 lightpink 浅红色
-colors = ['red','lightpink','cornflowerblue','skyblue','#FFA500','lightgreen','green']
+colors = ['red', 'lightpink', 'cornflowerblue', 'skyblue', '#FFA500', 'lightgreen', 'green']
 
-# 绘制三维散点图，这里我们使用不同的y坐标和颜色来区分不同的数据集
-scatter1 = ax.plot(x, y1, datax,c='green', label='shear(raw)')#X   ax.plot  ax.scatter
-# scatter2 = ax.scatter(x, y2, filtered_datax,c='lightgreen', label='filtered_shear')#Y
-scatter3 = ax.plot(x, y3, dataz,c='cornflowerblue', label='normal(raw)')#Z
+# 绘制三维线图，这里我们使用不同的y坐标和颜色来区分不同的数据集
+ax1.plot(x, y1, datax, c='green', label='shear(raw)')
+ax1.plot(x, y3, dataz, c='cornflowerblue', label='normal(raw)')
 
 # 设置图例
-ax.legend()
+ax1.legend()
 
 # 设置坐标轴标签
-ax.set_xlabel('Time/10ms')
-ax.set_ylabel('Group')
-ax.set_zlabel('Force/N')
+ax1.set_xlabel('Time/10ms')
+ax1.set_ylabel('Group')
+ax1.set_zlabel('Force/N')
+ax1.set_title("Raw Data")
 
-# 显示图形
-plt.show(block=False)
-
-
-
-
-# 创建第二个图和子图，用于显示滤波后的数据
-fig2 = plt.figure()
-fig2.canvas.manager.set_window_title("filtered")
-ax2 = fig2.add_subplot(111, projection='3d')
+# 第二个子图：滤波后的数据
+ax2 = fig.add_subplot(122, projection='3d')
 
 # 绘制滤波后的数据
 ax2.plot(x, y1, filtered_datax, c='#66CD00', label='shear(filtered)')#比浅绿色稍微深一点点
-ax2.plot(x, y3, filtered_dataz, c='skyblue', label='shear(filtered)')
+ax2.plot(x, y3, filtered_dataz, c='skyblue', label='normal(filtered)')
 
 # 设置图例
 ax2.legend()
@@ -114,6 +105,8 @@ ax2.legend()
 ax2.set_xlabel('Time/10ms')
 ax2.set_ylabel('Group')
 ax2.set_zlabel('Force/N')
+ax2.set_title("Filtered Data")
 
-# 显示滤波后的图形
+# 显示图形
+plt.tight_layout()
 plt.show()
