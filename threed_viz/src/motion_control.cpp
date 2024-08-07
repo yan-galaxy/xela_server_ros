@@ -16,9 +16,9 @@ threed_viz::robotiq3fctrl robotiq_Ctrl_msg;
 threed_viz::robotiq3f_feedback robotiq3f_feedback_msg;
 sensor_brainco::stm32data stm32data_msg;
 
-std::vector<double> SensorX(std::vector<double>(0));
-std::vector<double> SensorY(std::vector<double>(0));
-std::vector<double> SensorZ(std::vector<double>(0));
+// std::vector<double> SensorX(std::vector<double>(0));
+// std::vector<double> SensorY(std::vector<double>(0));
+// std::vector<double> SensorZ(std::vector<double>(0));
 volatile uint8_t ctrl_command;
 typedef struct
 {
@@ -37,7 +37,7 @@ public:
         alpha = dt / (RC + dt);
     }
 
-    double filter(double input) {
+    double process(double input) {
         double output = alpha * (prevOutput + input - prevInput);
         prevInput = input;
         prevOutput = output;
@@ -51,11 +51,61 @@ private:
     double prevInput;
     double prevOutput;
 };
+class BiquadBandFilter {
+public:
+    BiquadBandFilter(double lowCutoff, double highCutoff,double sampleRate )
+        :  lowCutoff(lowCutoff), highCutoff(highCutoff),sampleRate(sampleRate) {
+        calculateCoefficients();
+    }
+
+    double process(double input) {
+        double output = b0 * input + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
+        x2 = x1;
+        x1 = input;
+        y2 = y1;
+        y1 = output;
+        return output;
+    }
+
+    void updateCutoffFrequencies(double lowCutoff, double highCutoff) {
+        this->lowCutoff = lowCutoff;
+        this->highCutoff = highCutoff;
+        calculateCoefficients();
+    }
+
+private:
+    double sampleRate;
+    double lowCutoff;
+    double highCutoff;
+
+    double a1, a2, b0, b1, b2;
+    double x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+
+    void calculateCoefficients() {
+        double omega = 2.0 * M_PI * sqrt(lowCutoff * highCutoff) / sampleRate;
+        double bw = 2.0 * M_PI * (highCutoff - lowCutoff) / sampleRate;
+        double alpha = sin(omega) * sinh(log(2.0) / 2.0 * bw * omega / sin(omega));
+
+        double cosw0 = cos(omega);
+        double a0 = 1.0 + alpha;
+        
+        b0 = alpha / a0;
+        b1 = 0;
+        b2 = -alpha / a0;
+        a1 = -2.0 * cosw0 / a0;
+        a2 = (1.0 - alpha) / a0;
+    }
+};
 SEN_COO sen_coo[16];
 SEN_COO sen_all;
-ButterworthHighPassFilter filter_x(5.0, 100.0);
-ButterworthHighPassFilter filter_y(5.0, 100.0);
-ButterworthHighPassFilter filter_z(5.0, 100.0);
+//巴特沃斯高通滤波
+// ButterworthHighPassFilter filter_x(5.0, 100.0);
+// ButterworthHighPassFilter filter_y(5.0, 100.0);
+// ButterworthHighPassFilter filter_z(5.0, 100.0);
+//带通滤波器
+BiquadBandFilter filter_x(10.0,20.0, 100.0);
+BiquadBandFilter filter_y(10.0,20.0, 100.0);
+BiquadBandFilter filter_z(10.0,20.0, 100.0);
 double sen_filter_x;
 double sen_filter_y;
 double sen_filter_z;
@@ -76,20 +126,20 @@ void stm32sen_callback(const sensor_brainco::stm32data::ConstPtr& msg)
 {
     memcpy(&stm32data_msg,msg.get(),128);
     // ROS_INFO("10:%4d,11:%4d,3:%4d,5:%4d",stm32data_msg.voltage[10],stm32data_msg.voltage[11],stm32data_msg.voltage[3],stm32data_msg.voltage[5]);
-    stm32filter_3=filter_3.filter(stm32data_msg.voltage[3]);
-    stm32filter_5=filter_5.filter(stm32data_msg.voltage[5]);
-    stm32filter_10=filter_10.filter(stm32data_msg.voltage[10]);
-    stm32filter_11=filter_11.filter(stm32data_msg.voltage[11]);
+    stm32filter_3=filter_3.process(stm32data_msg.voltage[3]);
+    stm32filter_5=filter_5.process(stm32data_msg.voltage[5]);
+    stm32filter_10=filter_10.process(stm32data_msg.voltage[10]);
+    stm32filter_11=filter_11.process(stm32data_msg.voltage[11]);
     
-    saveDataToFile(savepath+"stm32raw3.txt", stm32data_msg.voltage[3]);
-    saveDataToFile(savepath+"stm32raw5.txt", stm32data_msg.voltage[5]);
-    saveDataToFile(savepath+"stm32raw10.txt", stm32data_msg.voltage[10]);
-    saveDataToFile(savepath+"stm32raw11.txt", stm32data_msg.voltage[11]);
+    // saveDataToFile(savepath+"stm32raw3.txt", stm32data_msg.voltage[3]);
+    // saveDataToFile(savepath+"stm32raw5.txt", stm32data_msg.voltage[5]);
+    // saveDataToFile(savepath+"stm32raw10.txt", stm32data_msg.voltage[10]);
+    // saveDataToFile(savepath+"stm32raw11.txt", stm32data_msg.voltage[11]);
 
-    saveDataToFile(savepath+"stm32fil3.txt", stm32filter_3);
-    saveDataToFile(savepath+"stm32fil5.txt", stm32filter_5);
-    saveDataToFile(savepath+"stm32fil10.txt", stm32filter_10);
-    saveDataToFile(savepath+"stm32fil11.txt", stm32filter_11);
+    // saveDataToFile(savepath+"stm32fil3.txt", stm32filter_3);
+    // saveDataToFile(savepath+"stm32fil5.txt", stm32filter_5);
+    // saveDataToFile(savepath+"stm32fil10.txt", stm32filter_10);
+    // saveDataToFile(savepath+"stm32fil11.txt", stm32filter_11);
 
 }
 void xsen_callback(const xela_server_ros::SensStream::ConstPtr& msg)
@@ -125,9 +175,9 @@ void xsen_callback(const xela_server_ros::SensStream::ConstPtr& msg)
         sen_all.x=sen_temp.x;
         sen_all.y=sen_temp.y;
         sen_all.z=sen_temp.z;
-        sen_filter_x=filter_x.filter(sen_all.x);
-        sen_filter_y=filter_y.filter(sen_all.y);
-        sen_filter_z=filter_z.filter(sen_all.z);
+        sen_filter_x=filter_x.process(sen_all.x);
+        sen_filter_y=filter_y.process(sen_all.y);
+        sen_filter_z=filter_z.process(sen_all.z);
         saveDataToFile(savepath+"xela_x.txt", sen_all.x);
         saveDataToFile(savepath+"xela_y.txt", sen_all.y);
         saveDataToFile(savepath+"xela_z.txt", sen_all.z);
@@ -185,31 +235,32 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
     sleep(1);
     robotiq_Ctrl_Once(0,20,0);
     sleep(3);
-    robotiq_Ctrl_Once(105,10,0);//合拢
+    robotiq_Ctrl_Once(105,0,10);//合拢
     ROS_INFO("motion");
     while(ros::ok())
     { 
         switch(run_stat)
         {
             case 0:
-                if(sen_filter_z>0.1 && ( (stm32data_msg.diff[3]<-30)||(stm32data_msg.diff[5]<-30)   
-                ||(stm32data_msg.diff[10]<-30)||(stm32data_msg.diff[11]<-30) ) )//三个手指都接触
+                if(sen_filter_z>0.1 && ( (stm32filter_3<-7)||(stm32filter_5<-7)   
+                ||(stm32filter_10<-7)||(stm32filter_11<-7) ) )//三个手指都接触
                 {
                     ROS_INFO("touch");
                     // robotiq_stop();
-                    robotiq_Ctrl_Once(robotiq3f_feedback_msg.A_position+6,50,0);//停止闭合
+                    // robotiq_Ctrl_Once(105,0,0);//控力
+                    robotiq_Ctrl_Once(robotiq3f_feedback_msg.A_position,50,0);//停止闭合
                     run_stat=1;
                 }
                 break;
 
             case 1:
-                sleep(15);
+                sleep(3);
                 ROS_INFO("down");
                 run_stat=2;
                 break;
 
             case 2:
-                sleep(10);
+                sleep(2);
                 robotiq_Ctrl_Once(0,20,0);
                 ROS_INFO("release");
                 run_stat=3;
@@ -239,7 +290,7 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
                 break;
                 
         }
-        usleep(100*1);
+        // usleep(100*1);
     }
 
 }
@@ -255,14 +306,14 @@ int main( int argc, char** argv )
     clearFileContent(savepath+"filter_y.txt");
     clearFileContent(savepath+"filter_z.txt");
 
-    clearFileContent(savepath+"stm32raw3.txt");
-    clearFileContent(savepath+"stm32raw5.txt");
-    clearFileContent(savepath+"stm32raw10.txt");
-    clearFileContent(savepath+"stm32raw11.txt");
-    clearFileContent(savepath+"stm32fil3.txt");
-    clearFileContent(savepath+"stm32fil5.txt");
-    clearFileContent(savepath+"stm32fil10.txt");
-    clearFileContent(savepath+"stm32fil11.txt");
+    // clearFileContent(savepath+"stm32raw3.txt");
+    // clearFileContent(savepath+"stm32raw5.txt");
+    // clearFileContent(savepath+"stm32raw10.txt");
+    // clearFileContent(savepath+"stm32raw11.txt");
+    // clearFileContent(savepath+"stm32fil3.txt");
+    // clearFileContent(savepath+"stm32fil5.txt");
+    // clearFileContent(savepath+"stm32fil10.txt");
+    // clearFileContent(savepath+"stm32fil11.txt");
 
     ros::Subscriber sub1 = n1.subscribe("xServTopic", 1000, xsen_callback);
     ros::Subscriber sub2 = n2.subscribe("stm32data_info", 1000, stm32sen_callback);
