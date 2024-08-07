@@ -16,7 +16,7 @@
 
     <node pkg="threed_viz" type="motion_control" name="motion_control" output="screen" />
 
-    <!-- <include file="$(find xela_server_ros)/launch/service.launch" /> -->
+    <include file="$(find xela_server_ros)/launch/service.launch" />
 
 </launch>
 
