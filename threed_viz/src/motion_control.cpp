@@ -99,13 +99,13 @@ private:
 SEN_COO sen_coo[16];
 SEN_COO sen_all;
 //巴特沃斯高通滤波
-// ButterworthHighPassFilter filter_x(5.0, 100.0);
-// ButterworthHighPassFilter filter_y(5.0, 100.0);
-// ButterworthHighPassFilter filter_z(5.0, 100.0);
+ButterworthHighPassFilter filter_x(5.0, 100.0);
+ButterworthHighPassFilter filter_y(5.0, 100.0);
+ButterworthHighPassFilter filter_z(5.0, 100.0);
 //带通滤波器
-BiquadBandFilter filter_x(10.0,20.0, 100.0);
-BiquadBandFilter filter_y(10.0,20.0, 100.0);
-BiquadBandFilter filter_z(10.0,20.0, 100.0);
+// BiquadBandFilter filter_x(15.0,50.0, 100.0);//外界机械扰动在1hz～5hz内明显
+// BiquadBandFilter filter_y(15.0,50.0, 100.0);
+// BiquadBandFilter filter_z(15.0,50.0, 100.0);
 double sen_filter_x;
 double sen_filter_y;
 double sen_filter_z;
@@ -248,18 +248,34 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
                     ROS_INFO("touch");
                     // robotiq_stop();
                     // robotiq_Ctrl_Once(105,0,0);//控力
-                    robotiq_Ctrl_Once(robotiq3f_feedback_msg.A_position,50,0);//停止闭合
-                    run_stat=1;
+                    
+                    run_stat=10;//不进行顺应性检测
+                    
+                    run_stat=1;//进行顺应性检测
+
+
                 }
                 break;
-
             case 1:
+                robotiq_Ctrl_Once(robotiq3f_feedback_msg.A_position,250,0);//停止闭合
+                usleep(1000*100);
+                robotiq_Ctrl_Once(robotiq3f_feedback_msg.A_position+1,250,0);//停止闭合
+                usleep(1000*100);
+                robotiq_Ctrl_Once(robotiq3f_feedback_msg.A_position+2,250,0);//停止闭合
+                usleep(1000*100);
+                robotiq_Ctrl_Once(robotiq3f_feedback_msg.A_position+3,250,0);//停止闭合
+                usleep(1000*100);
+
+                break;
+
+            case 10:
+                robotiq_Ctrl_Once(robotiq3f_feedback_msg.A_position,50,0);//停止闭合
                 sleep(3);
                 ROS_INFO("down");
                 run_stat=2;
                 break;
 
-            case 2:
+            case 11:
                 sleep(2);
                 robotiq_Ctrl_Once(0,20,0);
                 ROS_INFO("release");
@@ -273,16 +289,6 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
                 break;
 
             case 5:
-                break;
-
-
-
-            case 10:
-                break;
-
-            
-
-            case 20:
                 break;
 
 
