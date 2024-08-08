@@ -96,6 +96,31 @@ private:
         a2 = (1.0 - alpha) / a0;
     }
 };
+
+class ButterworthLowPassFilter {
+private:
+    double gain_;
+    double prev_output_;
+
+public:
+    // 构造函数
+    ButterworthLowPassFilter(double cutoff_freq, double sample_freq, int order = 1)
+    {
+        // 计算滤波器的增益，这里简化为使用截止频率和采样频率
+        double normalized_cutoff_freq = cutoff_freq / (sample_freq / 2); // 归一化截止频率
+        gain_ = 1 / (1 + std::tan(M_PI * normalized_cutoff_freq / order));
+        prev_output_ = 0.0;
+    }
+
+    // 应用巴特沃斯低通滤波器
+    double process(double input) {
+        // 使用一阶滤波器的递归公式
+        double output = gain_ * (input + prev_output_);
+        prev_output_ = output;
+        return output;
+    }
+};
+
 SEN_COO sen_coo[16];
 SEN_COO sen_all;
 //巴特沃斯高通滤波
@@ -106,6 +131,10 @@ ButterworthHighPassFilter filter_z(5.0, 100.0);
 // BiquadBandFilter filter_x(15.0,50.0, 100.0);//外界机械扰动在1hz～5hz内明显
 // BiquadBandFilter filter_y(15.0,50.0, 100.0);
 // BiquadBandFilter filter_z(15.0,50.0, 100.0);
+//巴特沃斯低通滤波
+// ButterworthLowPassFilter filter_x(2.0, 100.0);
+// ButterworthLowPassFilter filter_y(2.0, 100.0);
+// ButterworthLowPassFilter filter_z(5.0, 100.0);
 double sen_filter_x;
 double sen_filter_y;
 double sen_filter_z;
@@ -121,7 +150,7 @@ double stm32filter_11;
 
 std::string savepath = "/home/galaxy/Desktop/Xela_ws/src/threed_viz/data/";
 
-
+uint32_t xsen_record_cnt = 0;
 void stm32sen_callback(const sensor_brainco::stm32data::ConstPtr& msg)
 {
     memcpy(&stm32data_msg,msg.get(),128);
@@ -144,6 +173,7 @@ void stm32sen_callback(const sensor_brainco::stm32data::ConstPtr& msg)
 }
 void xsen_callback(const xela_server_ros::SensStream::ConstPtr& msg)
 {
+    xsen_record_cnt++;
     // 获取系统当前时间的Unix时间戳
     time_t now = time(NULL);
 
@@ -233,56 +263,114 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
 {
     uint8_t run_stat=0;
     sleep(1);
-    robotiq_Ctrl_Once(0,20,0);
-    sleep(3);
-    robotiq_Ctrl_Once(105,0,10);//合拢
+    
+    if(robotiq3f_feedback_msg.A_position>20)
+    {
+        robotiq_Ctrl_Once(0,250,0);
+        sleep(3);
+    }
+    robotiq_Ctrl_Once(105,0,0);//合拢
     ROS_INFO("motion");
+    uint8_t xsen_touch_flag = 0;
+    uint8_t stm32_touch_flag = 0;
+    
+    uint8_t touch_pos = 0 ;//接触时位置
+    uint8_t grasp_pos = 0 ;//抓取的位置增量
+    double record_force[4] = {0};
+    double diff_force = 0;
     while(ros::ok())
     { 
         switch(run_stat)
         {
             case 0:
-                if(sen_filter_z>0.1 && ( (stm32filter_3<-7)||(stm32filter_5<-7)   
-                ||(stm32filter_10<-7)||(stm32filter_11<-7) ) )//三个手指都接触
+                if(sen_filter_z>0.05)
+                {
+                    if(xsen_touch_flag==0)
+                    ROS_INFO("xsen_touch_flag");
+                    xsen_touch_flag = 1;
+                }
+                    
+                if((stm32filter_3<-7)||(stm32filter_5<-7)||(stm32filter_10<-7)||(stm32filter_11<-7))
+                {
+                    if(stm32_touch_flag==0)
+                    ROS_INFO("stm32_touch_flag");
+                    stm32_touch_flag = 1;
+                }
+                    
+
+                if( xsen_touch_flag && stm32_touch_flag )//三个手指都接触
                 {
                     ROS_INFO("touch");
+                    touch_pos = robotiq3f_feedback_msg.A_position;
                     // robotiq_stop();
                     // robotiq_Ctrl_Once(105,0,0);//控力
                     
-                    run_stat=10;//不进行顺应性检测
-                    
                     run_stat=1;//进行顺应性检测
 
+                    // run_stat=10;//不进行顺应性检测
+                    // robotiq_Ctrl_Once(touch_pos+5,50,0);//手动设置抓握位置
 
+                    
+                    ROS_INFO("run_stat:%d,xsen_cnt:%d",run_stat,xsen_record_cnt);
+                    
                 }
                 break;
             case 1:
-                robotiq_Ctrl_Once(robotiq3f_feedback_msg.A_position,250,0);//停止闭合
-                usleep(1000*100);
-                robotiq_Ctrl_Once(robotiq3f_feedback_msg.A_position+1,250,0);//停止闭合
-                usleep(1000*100);
-                robotiq_Ctrl_Once(robotiq3f_feedback_msg.A_position+2,250,0);//停止闭合
-                usleep(1000*100);
-                robotiq_Ctrl_Once(robotiq3f_feedback_msg.A_position+3,250,0);//停止闭合
-                usleep(1000*100);
+                robotiq_Ctrl_Once(touch_pos,50,0);//停止闭合
+                usleep(1000*800);
+                record_force[0] = sen_all.z;
+                robotiq_Ctrl_Once(touch_pos+1,0,1);
+                usleep(1000*500);
+                record_force[1] = sen_all.z;
+                robotiq_Ctrl_Once(touch_pos+2,0,1);
+                usleep(1000*500);
+                record_force[2] = sen_all.z;
 
+                diff_force = record_force[2] - record_force[0];
+                
+                ROS_INFO("record_force: %.3f %.3f %.3f",record_force[0],record_force[1],record_force[2]);
+                ROS_INFO("diff_force: %.3f",diff_force);
+                // ROS_INFO("compliance:%f mm/N",3.0/diff_force);
+                
+                // run_stat=3;//松开结束
+                run_stat=2;//继续夹持
+                ROS_INFO("Catch");
+                ROS_INFO("run_stat:%d,xsen_cnt:%d",run_stat,xsen_record_cnt);
+
+                break;
+            
+            case 2:
+                grasp_pos=(uint8_t)(diff_force/4);
+                if(grasp_pos>4)grasp_pos=4;
+
+                robotiq_Ctrl_Once(touch_pos+grasp_pos+6,20,0);
+                // usleep(1000*10000);
+                sleep(5);
+                ROS_INFO("down");
+                sleep(5);
+                run_stat=3;//松开结束
+                
+                break;
+            case 3:
+                robotiq_Ctrl_Once(0,20,0);
+                ROS_INFO("release");
+                ROS_INFO("run_stat:%d,xsen_cnt:%d",run_stat,xsen_record_cnt);
+                run_stat=255;
                 break;
 
             case 10:
-                robotiq_Ctrl_Once(robotiq3f_feedback_msg.A_position,50,0);//停止闭合
-                sleep(3);
+                sleep(12);
                 ROS_INFO("down");
-                run_stat=2;
+                run_stat=11;
+                ROS_INFO("run_stat:%d,xsen_cnt:%d",run_stat,xsen_record_cnt);
                 break;
 
             case 11:
-                sleep(2);
+                sleep(10);
                 robotiq_Ctrl_Once(0,20,0);
                 ROS_INFO("release");
-                run_stat=3;
-                break;
-
-            case 3:
+                run_stat=12;
+                ROS_INFO("run_stat:%d,xsen_cnt:%d",run_stat,xsen_record_cnt);
                 break;
 
             case 4:

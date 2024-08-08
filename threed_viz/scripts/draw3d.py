@@ -47,14 +47,17 @@ else:#没有输入参数 原路径
         "/home/galaxy/Desktop/Xela_ws/src/threed_viz/data/filter_z.txt"
     ] 
 # 读取数据
-datax, datay, dataz, fdatax, fdatay, fdataz = [read_data(path) for path in file_paths]
+# datax, datay, dataz, fdatax, fdatay, fdataz = [read_data(path) for path in file_paths]
 
-# datax_raw, datay, dataz_raw, fdatax_raw, fdatay, fdataz_raw = [read_data(path) for path in file_paths]
-# datax = datax_raw[649:900]
-# dataz = dataz_raw[649:900]
+datax_raw, datay, dataz_raw, fdatax_raw, fdatay, fdataz_raw = [read_data(path) for path in file_paths]
+start_index = 610
+end_index = 1400
 
-# fdatax = fdatax_raw[649:900]
-# fdataz = fdataz_raw[649:900]
+datax = datax_raw[start_index:end_index]
+dataz = dataz_raw[start_index:end_index]
+
+fdatax = fdatax_raw[start_index:end_index]
+fdataz = fdataz_raw[start_index:end_index]
 
 # 创建一个新的图和子图
 fig = plt.figure(figsize=(12, 6))
@@ -86,22 +89,22 @@ ax1.set_ylabel('Group')
 ax1.set_zlabel('Force/N')
 ax1.set_title("Raw Data")
 
-if len(sys.argv) > 2 and sys.argv[2] == 'f':
-    # 第二个子图：滤波后的数据
-    ax2 = fig.add_subplot(222, projection='3d')
+# if len(sys.argv) > 2 and sys.argv[2] == 'f':
+# 第二个子图：滤波后的数据
+ax2 = fig.add_subplot(222, projection='3d')
 
-    # 绘制滤波后的数据
-    ax2.plot(x, y1, fdatax, c='#66CD00', label='shear')#比浅绿色稍微深一点点
-    ax2.plot(x, y2, fdataz, c='skyblue', label='normal')
+# 绘制滤波后的数据
+ax2.plot(x, y1, fdatax, c='#66CD00', label='shear')#比浅绿色稍微深一点点
+ax2.plot(x, y2, fdataz, c='skyblue', label='normal')
 
-    # 设置图例
-    ax2.legend()
+# 设置图例
+ax2.legend()
 
-    # 设置坐标轴标签
-    ax2.set_xlabel('Time/10ms')
-    ax2.set_ylabel('Group')
-    ax2.set_zlabel('Force/N')
-    ax2.set_title("Filtered Data")
+# 设置坐标轴标签
+ax2.set_xlabel('Time/10ms')
+ax2.set_ylabel('Group')
+ax2.set_zlabel('Force/N')
+ax2.set_title("Filtered Data")
 
 
 
