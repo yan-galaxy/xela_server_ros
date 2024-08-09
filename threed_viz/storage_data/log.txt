@@ -43,7 +43,6 @@ smartwater
 308 可乐 顺应性测试后夹持 上升速度3 不滑动
 309 西柚汁 顺应性测试后夹持 上升速度3 滑动！
 
-
 310 smartwater 顺应性测试后夹持 上升速度5 不滑动
 311 西柚汁 顺应性测试后夹持 上升速度5 不滑动
 313 西柚汁 顺应性测试后夹持 上升速度5 滑动！
@@ -51,3 +50,25 @@ smartwater
 315 西柚汁 顺应性测试后夹持 上升速度5 滑动！ catch 414   release 1417
 328 西柚汁 顺应性测试后夹持 上升速度3 滑动！ catch 402   release 1411   加了pos+3
 329 西柚汁 顺应性测试后夹持 上升速度5 不滑动 catch 403   release 1407   加了pos+6
+330 smartwater 顺应性测试后夹持 上升速度3 滑动!  catch 425   release 1426   
+331 smartwater 顺应性测试后夹持 上升速度3 不滑动  catch 426   release 1435   加了pos+3
+332 smartwater 顺应性测试后夹持 上升速度3 不滑动  catch 428   release 1434   加了pos+6
+
+335 smartwater 顺应性测试后夹持 上升速度3 滑动  catch 428   release 1434     slip 547
+336 smartwater 顺应性测试后夹持 上升速度3 滑动  catch 428   release 1434     slip 540
+338 smartwater 顺应性测试后夹持 上升速度3 滑动  catch 431   release 1431     slip 519
+339 smartwater 顺应性测试后夹持 上升速度3 不滑动  catch 453   release 1458 
+
+343 西柚汁 顺应性测试后夹持 上升速度3 滑动!  catch 403   release 1404 slip none  相关系数和x上升 
+344 西柚汁 顺应性测试后夹持 上升速度3 滑动!  catch 405   release 1404 slip 516  相关系数 
+
+345 西柚汁 顺应性测试后夹持 上升速度3 滑动!  catch 408   release 1428 slip 585  相关系数   根据滑移调整握力+10
+346 西柚汁 顺应性测试后夹持 上升速度3 夹起之后滑动  catch 394   release 1422 slip 494  相关系数   根据滑移调整握力+5
+
+
+347 海绵 顺应性测试后夹持 上升速度3 不滑动 diff_force:1.723  catch 527  release 1534 相关系数  根据滑移调整握力+5
+348 满可乐 顺应性测试后夹持 上升速度3 滑动！ diff_force:13.558  catch 451  release 1463 slip 643 相关系数  根据滑移调整握力+10
+349 空可乐 顺应性测试后夹持 上升速度3 不滑动 diff_force:4.102  catch 437  release 1439 slip none 相关系数  根据滑移调整握力+2
+350 椰汁 顺应性测试后夹持 上升速度3 不滑动 diff_force:13.017  catch 469  release 1472 slip none 相关系数  根据滑移调整握力+2
+351 smartwater 顺应性测试后夹持 上升速度3 滑动 diff_force:15.923  catch 439  release 1472 slip 524 相关系数  根据滑移调整握力+2
+352 西柚汁 顺应性测试后夹持 上升速度3 滑动 diff_force:7.467  catch 409  release 1433 slip 529 相关系数  根据滑移调整握力+2

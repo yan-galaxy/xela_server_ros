@@ -47,17 +47,17 @@ else:#没有输入参数 原路径
         "/home/galaxy/Desktop/Xela_ws/src/threed_viz/data/filter_z.txt"
     ] 
 # 读取数据
-# datax, datay, dataz, fdatax, fdatay, fdataz = [read_data(path) for path in file_paths]
+datax, datay, dataz, fdatax, fdatay, fdataz = [read_data(path) for path in file_paths]
 
-datax_raw, datay, dataz_raw, fdatax_raw, fdatay, fdataz_raw = [read_data(path) for path in file_paths]
-start_index = 610
-end_index = 1400
+# datax_raw, datay, dataz_raw, fdatax_raw, fdatay, fdataz_raw = [read_data(path) for path in file_paths]
+# start_index = 530
+# end_index = 1400
 
-datax = datax_raw[start_index:end_index]
-dataz = dataz_raw[start_index:end_index]
+# datax = datax_raw[start_index:end_index]
+# dataz = dataz_raw[start_index:end_index]
 
-fdatax = fdatax_raw[start_index:end_index]
-fdataz = fdataz_raw[start_index:end_index]
+# fdatax = fdatax_raw[start_index:end_index]
+# fdataz = fdataz_raw[start_index:end_index]
 
 # 创建一个新的图和子图
 fig = plt.figure(figsize=(12, 6))

@@ -7,6 +7,7 @@
 #include "draw_chart.h"
 #include <ctime>
 #include <cmath>
+#include <numeric>
 
 #include "threed_viz/robotiq3fctrl.h" 
 #include "threed_viz/robotiq3f_feedback.h" 
@@ -27,6 +28,60 @@ typedef struct
     double z;
     double len;
 }SEN_COO;
+double pearsonCorrelation(const std::vector<double>& x, const std::vector<double>& y) {
+    if (x.size() != y.size()) {
+        throw std::invalid_argument("The size of x and y must be the same.");
+    }
+
+    double sum_x = std::accumulate(x.begin(), x.end(), 0.0);
+    double sum_y = std::accumulate(y.begin(), y.end(), 0.0);
+    double sum_xy = 0.0, sum_x2 = 0.0, sum_y2 = 0.0;
+
+    for (size_t i = 0; i < x.size(); ++i) {
+        sum_xy += x[i] * y[i];
+        sum_x2 += x[i] * x[i];
+        sum_y2 += y[i] * y[i];
+    }
+
+    double mean_x = sum_x / x.size();
+    double mean_y = sum_y / y.size();
+    double numerator = sum_xy - (mean_x * sum_y);
+    double denominator = std::sqrt((sum_x2 - (mean_x * mean_x * x.size())) * (sum_y2 - (mean_y * mean_y * y.size())));
+
+    if (denominator == 0) {
+        throw std::runtime_error("Denominator is zero, cannot divide by zero.");
+    }
+
+    return numerator / denominator;
+}
+int calculateDerivative(const std::vector<double>& data) {//导数全为正反馈1 全为负反馈-1 其他0
+    std::vector<double> derivative(data.size() - 1);
+    int overallSign = 0; // 默认值设为0，表示导数有正有负或全为零
+    double dt = 1.0; // 假设采样间隔是1
+
+    for (size_t i = 0; i < data.size() - 1; ++i) {
+        double diff = (data[i + 1] - data[i]) / dt;
+        derivative[i] = diff;
+
+        // 根据第一个非零导数设置overallSign
+        if (overallSign == 0 && diff != 0) {
+            overallSign = (diff > 0) ? 1 : -1;
+        }
+        // 如果overallSign已经确定，检查是否有不同符号的导数出现
+        else if ((overallSign == 1 && diff < 0) || (overallSign == -1 && diff > 0)) {
+            overallSign = 0; // 发现不同符号，重置为0
+            break;
+        }
+    }
+
+    return overallSign;
+}
+std::vector<double> vecx;//实时计算相关系数缓存 一共缓存五个数据
+std::vector<double> vecz;
+std::vector<int> overallSign_x;//是否全为正或全为负数
+std::vector<int> overallSign_z;
+std::vector<double> correlation_xz;
+std::vector<double> correlation_buffer;
 // 定义一阶巴特沃斯高通滤波器
 class ButterworthHighPassFilter {
 public:
@@ -151,6 +206,7 @@ double stm32filter_11;
 std::string savepath = "/home/galaxy/Desktop/Xela_ws/src/threed_viz/data/";
 
 uint32_t xsen_record_cnt = 0;
+uint8_t slip_flag = 0;
 void stm32sen_callback(const sensor_brainco::stm32data::ConstPtr& msg)
 {
     memcpy(&stm32data_msg,msg.get(),128);
@@ -205,10 +261,10 @@ void xsen_callback(const xela_server_ros::SensStream::ConstPtr& msg)
         sen_all.x=sen_temp.x;
         sen_all.y=sen_temp.y;
         sen_all.z=sen_temp.z;
-        sen_filter_x=filter_x.process(sen_all.x);
+        sen_filter_x=filter_x.process(sen_all.x);//滤波
         sen_filter_y=filter_y.process(sen_all.y);
         sen_filter_z=filter_z.process(sen_all.z);
-        saveDataToFile(savepath+"xela_x.txt", sen_all.x);
+        saveDataToFile(savepath+"xela_x.txt", sen_all.x);//存到txt
         saveDataToFile(savepath+"xela_y.txt", sen_all.y);
         saveDataToFile(savepath+"xela_z.txt", sen_all.z);
         saveDataToFile(savepath+"filter_x.txt", sen_filter_x);
@@ -216,6 +272,70 @@ void xsen_callback(const xela_server_ros::SensStream::ConstPtr& msg)
         saveDataToFile(savepath+"filter_z.txt", sen_filter_z);
         sen_all.len=std::sqrt(sen_all.x * sen_all.x + sen_all.y * sen_all.y + sen_all.z * sen_all.z);
         // ROS_INFO("ALL X: %f, Y: %f, Z: %f,len: %f",sen_all.x ,sen_all.y ,sen_all.z,sen_all.len);
+
+        static uint8_t run_stat=0;
+        if(vecx.size()<5)
+        {
+            vecx.push_back(sen_all.x);
+            vecz.push_back(sen_all.z);
+        }
+        // else if(vecx.size()==4)
+        // {
+        //     vecx.push_back(sen_all.x);
+        //     vecz.push_back(sen_all.z);
+        //     correlation_xz.push_back(pearsonCorrelation(vecx, vecz));//计算原数据首位的相关系数
+        // }
+        else
+        {
+            vecx.erase(vecx.begin());//移除缓存最前面的数据
+            vecz.erase(vecz.begin());
+
+            vecx.push_back(sen_all.x);//添加新数据到缓存
+            vecz.push_back(sen_all.z);
+
+            overallSign_x.push_back(calculateDerivative(vecx));//计算x轴overallSign
+            overallSign_z.push_back(calculateDerivative(vecz));//计算z轴overallSign
+            correlation_xz.push_back(pearsonCorrelation(vecx, vecz));//计算原数据首位的相关系数
+
+            switch(run_stat)
+            {
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                    if(correlation_xz[0]<-0.8)
+                    {
+                        run_stat++;
+                    }
+                    else
+                    {
+                        run_stat=0;
+                    }
+                    correlation_xz.erase(correlation_xz.begin());
+                    // cnt++;
+                    if(run_stat!=10)break;
+                case 10:
+                    // if(overallSign_z[xsen_record_cnt-5]<=0 && overallSign_x[xsen_record_cnt-5]>0)
+                    // if(overallSign_x[xsen_record_cnt-5]>0)
+                    {
+                        ROS_INFO("slip %d",xsen_record_cnt);
+                        slip_flag=1;
+                        // std::cout << "get" << xsen_record_cnt << std::endl;
+                        // std::cout << "dataZ Derivative:" << overallSign_z[xsen_record_cnt-5] << std::endl;
+                        // std::cout << "dataX Derivative:" << overallSign_x[xsen_record_cnt-5] << std::endl;
+                    }
+                    run_stat--;
+                    break;
+            }
+        }
+
+        
     }
 }
 void robotiq3f_fb_callback(const threed_viz::robotiq3f_feedback::ConstPtr& msg)
@@ -343,11 +463,36 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
                 grasp_pos=(uint8_t)(diff_force/4);
                 if(grasp_pos>4)grasp_pos=4;
 
-                robotiq_Ctrl_Once(touch_pos+grasp_pos+6,20,0);
+                robotiq_Ctrl_Once(touch_pos+grasp_pos,20,0);
                 // usleep(1000*10000);
-                sleep(5);
+                for(size_t i=0;i<50;i++)
+                {
+                    if(slip_flag)
+                    {
+                        grasp_pos+=2;
+                        robotiq_Ctrl_Once(touch_pos+grasp_pos,20,0);
+                        ROS_INFO("plus press");
+                        usleep(1000*100);
+                        slip_flag=0;
+                    }
+                    usleep(1000*100);
+                    
+                }
+                // sleep(5);
                 ROS_INFO("down");
-                sleep(5);
+                // sleep(5);
+                for(size_t i=0;i<50;i++)
+                {
+                    if(slip_flag)
+                    {
+                        grasp_pos+=2;
+                        robotiq_Ctrl_Once(touch_pos+grasp_pos,20,0);
+                        ROS_INFO("plus press");
+                        usleep(1000*100);
+                        slip_flag=0;
+                    }
+                    usleep(1000*100);
+                }
                 run_stat=3;//松开结束
                 
                 break;
