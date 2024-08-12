@@ -270,6 +270,13 @@ void xsen_callback(const xela_server_ros::SensStream::ConstPtr& msg)
         saveDataToFile(savepath+"filter_x.txt", sen_filter_x);
         saveDataToFile(savepath+"filter_y.txt", sen_filter_y);
         saveDataToFile(savepath+"filter_z.txt", sen_filter_z);
+
+        for(uint8_t i=0;i<16;i++)
+        {
+            saveDataToFile(savepath+"xela"+std::to_string(i)+"_x.txt", msg->sensors[0].forces[i].x);//存到txt
+            saveDataToFile(savepath+"xela"+std::to_string(i)+"_y.txt", msg->sensors[0].forces[i].y);
+            saveDataToFile(savepath+"xela"+std::to_string(i)+"_z.txt", msg->sensors[0].forces[i].z);
+        }
         sen_all.len=std::sqrt(sen_all.x * sen_all.x + sen_all.y * sen_all.y + sen_all.z * sen_all.z);
         // ROS_INFO("ALL X: %f, Y: %f, Z: %f,len: %f",sen_all.x ,sen_all.y ,sen_all.z,sen_all.len);
 
@@ -465,34 +472,34 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
 
                 robotiq_Ctrl_Once(touch_pos+grasp_pos,20,0);
                 // usleep(1000*10000);
-                for(size_t i=0;i<50;i++)
-                {
-                    if(slip_flag)
-                    {
-                        grasp_pos+=2;
-                        robotiq_Ctrl_Once(touch_pos+grasp_pos,20,0);
-                        ROS_INFO("plus press");
-                        usleep(1000*100);
-                        slip_flag=0;
-                    }
-                    usleep(1000*100);
+                // for(size_t i=0;i<50;i++)
+                // {
+                //     if(slip_flag)
+                //     {
+                //         grasp_pos+=2;
+                //         robotiq_Ctrl_Once(touch_pos+grasp_pos,20,0);
+                //         ROS_INFO("plus press");
+                //         usleep(1000*100);
+                //         slip_flag=0;
+                //     }
+                //     usleep(1000*100);
                     
-                }
-                // sleep(5);
+                // }
+                sleep(5);
                 ROS_INFO("down");
-                // sleep(5);
-                for(size_t i=0;i<50;i++)
-                {
-                    if(slip_flag)
-                    {
-                        grasp_pos+=2;
-                        robotiq_Ctrl_Once(touch_pos+grasp_pos,20,0);
-                        ROS_INFO("plus press");
-                        usleep(1000*100);
-                        slip_flag=0;
-                    }
-                    usleep(1000*100);
-                }
+                sleep(5);
+                // for(size_t i=0;i<50;i++)
+                // {
+                //     if(slip_flag)
+                //     {
+                //         grasp_pos+=2;
+                //         robotiq_Ctrl_Once(touch_pos+grasp_pos,20,0);
+                //         ROS_INFO("plus press");
+                //         usleep(1000*100);
+                //         slip_flag=0;
+                //     }
+                //     usleep(1000*100);
+                // }
                 run_stat=3;//松开结束
                 
                 break;
@@ -553,6 +560,12 @@ int main( int argc, char** argv )
     // clearFileContent(savepath+"stm32fil5.txt");
     // clearFileContent(savepath+"stm32fil10.txt");
     // clearFileContent(savepath+"stm32fil11.txt");
+    for(uint8_t i=0;i<16;i++)
+    {
+        clearFileContent(savepath+"xela"+std::to_string(i)+"_x.txt");
+        clearFileContent(savepath+"xela"+std::to_string(i)+"_y.txt");
+        clearFileContent(savepath+"xela"+std::to_string(i)+"_z.txt");
+    }
 
     ros::Subscriber sub1 = n1.subscribe("xServTopic", 1000, xsen_callback);
     ros::Subscriber sub2 = n2.subscribe("stm32data_info", 1000, stm32sen_callback);

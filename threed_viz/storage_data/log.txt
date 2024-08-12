@@ -72,3 +72,19 @@ smartwater
 350 椰汁 顺应性测试后夹持 上升速度3 不滑动 diff_force:13.017  catch 469  release 1472 slip none 相关系数  根据滑移调整握力+2
 351 smartwater 顺应性测试后夹持 上升速度3 滑动 diff_force:15.923  catch 439  release 1472 slip 524 相关系数  根据滑移调整握力+2
 352 西柚汁 顺应性测试后夹持 上升速度3 滑动 diff_force:7.467  catch 409  release 1433 slip 529 相关系数  根据滑移调整握力+2
+
+
+
+400 西柚汁 顺应性测试后夹持+0 上升速度5 滑动 diff_force:0.317 catch 394 release 1397 slip 517 相关系数  
+401 西柚汁 顺应性测试后夹持+2 上升速度5 滑动 diff_force:0.416 catch 400 release 1407 slip 567 相关系数  
+402 西柚汁 顺应性测试后夹持+4 上升速度5 滑动 diff_force:0.023 catch 403 release 1407 slip 740 相关系数  
+403 西柚汁 顺应性测试后夹持+6 上升速度5 不滑动 diff_force:3.741 catch 425 release 1425 slip 626 相关系数  
+404 西柚汁 顺应性测试后夹持+8 上升速度5 不滑动 diff_force:4.489 catch 409 release 1413 slip 628 相关系数  
+405 西柚汁 顺应性测试后夹持+10 上升速度5 不滑动 diff_force:4.028 catch 400 release 1401 slip 620-678 相关系数  
+406 smartwater 顺应性测试后夹持+0 上升速度5 不滑动 diff_force:13.274 catch 437 release 1435 slip 698-702 830 882-887 相关系数  
+407 smartwater 顺应性测试后夹持-2 上升速度5 滑动 diff_force:6.111 catch 430 release 1435 slip  相关系数  
+408 smartwater 顺应性测试后夹持-2 上升速度5 滑动 diff_force:6.639 catch 432 release 1434 slip  相关系数  
+409 smartwater 顺应性测试后夹持+0 上升速度5 不滑动 diff_force:12.839 catch 422 release 1422 slip 698 相关系数  
+410 smartwater 顺应性测试后夹持+0 上升速度5 不滑动 diff_force:13.659 catch 432 release 1435 slip 535 相关系数  
+411 smartwater 顺应性测试后夹持+0 上升速度5 一直在缓慢滑动不调变 diff_force:6.934 catch 430 release 1432 slip 628 相关系数  
+412 smartwater 顺应性测试后夹持+0 上升速度5 一直在缓慢滑动不调变 diff_force:6.867 catch 433 release 1434 slip 597 相关系数  
