@@ -52,6 +52,12 @@ add_executable(subscriber_sensor src/subscriber_sensor.cpp)
 # 链接ROS包
 target_link_libraries(subscriber_sensor ${catkin_LIBRARIES} )
 
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+link_directories(${OpenCV_LIB_DIRS})
+
+
+
 file(
 GLOB SRC_LIST 
 ${CMAKE_CURRENT_SOURCE_DIR}/src/serial_robotiq3f.cpp
@@ -71,6 +77,8 @@ ${CMAKE_CURRENT_SOURCE_DIR}/src/motion_control.cpp
 add_executable(motion_control ${MOTION_SRC_LIST})
 target_link_libraries(motion_control ${catkin_LIBRARIES})# 主流程运动控制
 add_dependencies(motion_control ${PROJECT_NAME}_gencpp)# 链接自定义消息必须添加的
+
+target_link_libraries(motion_control ${OpenCV_LIBS})
 #############
 ## Install ##
 #############

@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <thread>
 
+#include <opencv2/opencv.hpp>
+#include "opencv2/core.hpp"
+#include "opencv2/highgui.hpp"
+
 #include <vector>
 #include "draw_chart.h"
 #include <ctime>
@@ -386,6 +390,55 @@ void robotiq_stop()
     robotiq_Ctrl_msg.command=1;
     robotiq_Ctrl_msg.stop=1;
 }
+int camera_proj()
+{
+    cv::VideoCapture capture(6); // 打开摄像头
+    if (!capture.isOpened()) {
+        std::cerr << "无法打开摄像头" << std::endl;
+        return -1;
+    }
+
+    capture.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
+    capture.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
+
+    double width=capture.get(cv::CAP_PROP_FRAME_WIDTH);
+    double height=capture.get(cv::CAP_PROP_FRAME_HEIGHT);
+    double fps = capture.get(cv::CAP_PROP_FPS);
+
+    // 定义MP4视频文件的路径
+    std::string videoFile = "/home/galaxy/Desktop/Xela_ws/src/threed_viz/video/output.mp4";
+    // 定义视频的四字符代码为H.264编码器
+    int fourcc = cv::VideoWriter::fourcc('a', 'v', 'c', '1');
+    // 创建VideoWriter对象，指定MP4格式和H.264编码器
+    cv::VideoWriter videoWriter;
+    videoWriter.open(videoFile, fourcc, fps, cv::Size(width, height), true);
+    if (!videoWriter.isOpened()) {
+        std::cerr << "无法创建视频文件" << std::endl;
+        return -1;
+    }
+
+    cv::Mat frame;
+    while (ros::ok()) {
+        capture.read(frame); // 读取帧
+        if (frame.empty()) {
+            std::cerr << "无法读取帧" << std::endl;
+            break;
+        }
+        // 写入帧到MP4视频文件
+        videoWriter.write(frame);
+
+        cv::imshow("Video", frame); // 显示帧
+
+        if (cv::waitKey(30) >= 0) break; // 按任意键退出
+    }
+
+    capture.release(); // 释放摄像头
+    videoWriter.release(); // 释放VideoWriter
+    cv::destroyAllWindows(); // 销毁所有窗口
+    std::cerr << "已关闭摄像头" << std::endl;
+    return 0;
+}
+
 void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反馈数据fb
 {
     uint8_t run_stat=0;
@@ -577,5 +630,8 @@ int main( int argc, char** argv )
     
     std::thread main_proj_thread(main_proj,robotiq_Ctrl_info_pub);
     
+    std::thread camera_proj_thread(camera_proj);
+
     ros::spin();
+    camera_proj_thread.join();
 }
