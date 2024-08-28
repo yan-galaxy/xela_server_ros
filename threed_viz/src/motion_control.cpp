@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <thread>
 
+#include <atomic>
+#include <csignal>
+
 #include <opencv2/opencv.hpp>
 #include "opencv2/core.hpp"
 #include "opencv2/highgui.hpp"
@@ -17,6 +20,8 @@
 #include "threed_viz/robotiq3f_feedback.h" 
 #include "xela_server_ros/SensStream.h"
 #include "sensor_brainco/stm32data.h"
+
+
 threed_viz::robotiq3fctrl robotiq_Ctrl_msg;
 threed_viz::robotiq3f_feedback robotiq3f_feedback_msg;
 sensor_brainco::stm32data stm32data_msg;
@@ -401,8 +406,8 @@ int camera_proj()
     capture.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
     capture.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
 
-    double width=capture.get(cv::CAP_PROP_FRAME_WIDTH);
-    double height=capture.get(cv::CAP_PROP_FRAME_HEIGHT);
+    double width=1280;
+    double height=720;
     double fps = capture.get(cv::CAP_PROP_FPS);
 
     // 定义MP4视频文件的路径
@@ -418,7 +423,9 @@ int camera_proj()
     }
 
     cv::Mat frame;
-    while (ros::ok()) {
+    for(int i=0;i<300;i++)
+    // while (1) 
+    {
         capture.read(frame); // 读取帧
         if (frame.empty()) {
             std::cerr << "无法读取帧" << std::endl;
@@ -429,7 +436,8 @@ int camera_proj()
 
         cv::imshow("Video", frame); // 显示帧
 
-        if (cv::waitKey(30) >= 0) break; // 按任意键退出
+        if (cv::waitKey(30) >= 0) break;
+        if (!ros::ok())break;
     }
 
     capture.release(); // 释放摄像头
