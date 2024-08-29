@@ -12,7 +12,7 @@
     
     <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find sensor_brainco)/config/rviz_hand.rviz"/> -->
 
-    <!-- <node name="rqt_plot" pkg="rqt_plot" type="rqt_plot" /> -->
+    <node name="rqt_plot" pkg="rqt_plot" type="rqt_plot" />
 
     <node pkg="threed_viz" type="motion_control" name="motion_control" output="screen" />
 

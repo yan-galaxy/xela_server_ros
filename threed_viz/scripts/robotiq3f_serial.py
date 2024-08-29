@@ -179,9 +179,14 @@ if __name__ == '__main__':
         threading.Thread(target=robotiq_node.proc).start()
         # robotiq_node.proc()
         rospy.spin()
+        
     except rospy.ROSInterruptException:
         pass
     finally:
+        robotiq_node.ctrl_data[10]=0  #postion
+        robotiq_node.ctrl_data[11]=255  #speed
+        robotiq_node.modbus_frame_ctrl = robotiq_node.build_modbus_frame(robotiq_node.ctrl_data)
+        robotiq_node.ser.write(robotiq_node.modbus_frame_ctrl)
         if 'ser' in locals() and robotiq_node.ser.isOpen():
             robotiq_node.ser.close()
             rospy.loginfo("robotiq串口已关闭")

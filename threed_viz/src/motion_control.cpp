@@ -213,7 +213,13 @@ double stm32filter_3;
 double stm32filter_5;
 double stm32filter_10;
 double stm32filter_11;
-
+double start_x;
+double start_y;
+double start_z;
+double start_st3;
+double start_st5;
+double start_st10;
+double start_st11;
 std::string savepath = "/home/galaxy/Desktop/Xela_ws/src/threed_viz/data/";
 
 uint32_t xsen_record_cnt = 0;
@@ -342,11 +348,11 @@ void xsen_callback(const xela_server_ros::SensStream::ConstPtr& msg)
                     // if(overallSign_z[xsen_record_cnt-5]<=0 && overallSign_x[xsen_record_cnt-5]>0)
                     // if(overallSign_x[xsen_record_cnt-5]>0)
                     {
-                        ROS_INFO("slip %d",xsen_record_cnt);
-                        slip_flag=1;
-                        // std::cout << "get" << xsen_record_cnt << std::endl;
-                        // std::cout << "dataZ Derivative:" << overallSign_z[xsen_record_cnt-5] << std::endl;
-                        // std::cout << "dataX Derivative:" << overallSign_x[xsen_record_cnt-5] << std::endl;
+                        // ROS_INFO("slip %d",xsen_record_cnt);
+                        // slip_flag=1;
+                        // // std::cout << "get" << xsen_record_cnt << std::endl;
+                        // // std::cout << "dataZ Derivative:" << overallSign_z[xsen_record_cnt-5] << std::endl;
+                        // // std::cout << "dataX Derivative:" << overallSign_x[xsen_record_cnt-5] << std::endl;
                     }
                     run_stat--;
                     break;
@@ -473,12 +479,38 @@ int camera_proj()
 void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反馈数据fb
 {
     uint8_t run_stat=0;
-    sleep(1);
+    while(xsen_record_cnt<100);
+    for(int i=0;i<100;i++)
+    {
+        start_x+=sen_all.x;
+        start_y+=sen_all.y;
+        start_z+=sen_all.z;
+
+        start_st3+=stm32data_msg.voltage[3];
+        start_st5+=stm32data_msg.voltage[5];
+        start_st10+=stm32data_msg.voltage[10];
+        start_st11+=stm32data_msg.voltage[11];
+        usleep(1005*10);
+    }
+    start_x/=100.0;
+    start_y/=100.0;
+    start_z/=100.0;
+    start_st3/=100.0;
+    start_st5/=100.0;
+    start_st10/=100.0;
+    start_st11/=100.0;
+
+    ROS_INFO("start_z:%lf",
+    start_z);
+
+    ROS_INFO("10:%4.2lf,11:%4.2lf,3:%4.2lf,5:%4.2lf",
+    start_st10,start_st11,start_st3,start_st5);
+    sleep(2);
     
     if(robotiq3f_feedback_msg.A_position>20)
     {
         robotiq_Ctrl_Once(0,250,0);
-        sleep(3);
+        sleep(2);
     }
     robotiq_Ctrl_Once(100,0,0);//合拢
     ROS_INFO("motion");
@@ -494,22 +526,50 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
         switch(run_stat)
         {
             case 0:
-                if(sen_filter_z>0.05)
+                if((sen_filter_z>0.07) || ((sen_all.z-start_z)>0.3) )//  存在高频信号或者阈值相比初始状态超过一定值
                 {
                     if(xsen_touch_flag==0)
-                    ROS_INFO("xsen_touch_flag");
-                    xsen_touch_flag = 1;
+                    {
+                        if(sen_filter_z>0.07)
+                            ROS_INFO("xsen_filter");
+                        else if((sen_all.z-start_z)>0.3)
+                            ROS_INFO("xsen_value");
+                        ROS_INFO("xsen_touch_flag");
+                        xsen_touch_flag = 1;
+                    }
                 }
                     
-                if((stm32filter_3<-7)||(stm32filter_5<-7)||(stm32filter_10<-7)||(stm32filter_11<-7))
+                if(
+                    (stm32filter_3<-7)||(stm32filter_5<-7) ||
+                    (stm32filter_10<-7)||(stm32filter_11<-7) ||
+
+                    ((stm32data_msg.voltage[3]-start_st3)<-70) || 
+                    ((stm32data_msg.voltage[5]-start_st5)<-70) || 
+                    ((stm32data_msg.voltage[10]-start_st10)<-70) || 
+                    ((stm32data_msg.voltage[11]-start_st11)<-70)
+                )// raw:-7     //  存在高频信号或者阈值相比初始状态超过一定值
                 {
                     if(stm32_touch_flag==0)
-                    ROS_INFO("stm32_touch_flag");
-                    stm32_touch_flag = 1;
+                    {
+                        if(
+                            (stm32filter_3<-7)||(stm32filter_5<-7) ||
+                            (stm32filter_10<-7)||(stm32filter_11<-7)
+                        )
+                            ROS_INFO("stm32_filter");
+                        else if(
+                            ((stm32data_msg.voltage[3]-start_st3)<-70) || 
+                            ((stm32data_msg.voltage[5]-start_st5)<-70) || 
+                            ((stm32data_msg.voltage[10]-start_st10)<-70) || 
+                            ((stm32data_msg.voltage[11]-start_st11)<-70)
+                        )
+                            ROS_INFO("stm32_value");
+                        ROS_INFO("stm32_touch_flag");
+                        stm32_touch_flag = 1;
+                    }
                 }
                     
 
-                if( xsen_touch_flag && stm32_touch_flag )//三个手指都接触
+                if( xsen_touch_flag && stm32_touch_flag )//三个手指都接触 xsen_touch_flag && stm32_touch_flag
                 {
                     ROS_INFO("touch");
                     touch_pos = robotiq3f_feedback_msg.A_position;
@@ -552,7 +612,7 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
             
             case 2:
                 grasp_pos=(uint8_t)(diff_force/4);
-                if(grasp_pos>4)grasp_pos=4;
+                if(grasp_pos>16)grasp_pos=16;
 
                 robotiq_Ctrl_Once(touch_pos+grasp_pos,20,0);
                 // usleep(1000*10000);
@@ -569,9 +629,9 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
                 //     usleep(1000*100);
                     
                 // }
-                sleep(5);
+                sleep(15);
                 ROS_INFO("down");
-                sleep(5);
+                sleep(15);
                 // for(size_t i=0;i<50;i++)
                 // {
                 //     if(slip_flag)

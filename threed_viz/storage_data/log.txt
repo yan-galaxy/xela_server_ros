@@ -87,4 +87,92 @@ smartwater
 409 smartwater 顺应性测试后夹持+0 上升速度5 不滑动 diff_force:12.839 catch 422 release 1422 slip 698 相关系数  
 410 smartwater 顺应性测试后夹持+0 上升速度5 不滑动 diff_force:13.659 catch 432 release 1435 slip 535 相关系数  
 411 smartwater 顺应性测试后夹持+0 上升速度5 一直在缓慢滑动不调变 diff_force:6.934 catch 430 release 1432 slip 628 相关系数  
-412 smartwater 顺应性测试后夹持+0 上升速度5 一直在缓慢滑动不调变 diff_force:6.867 catch 433 release 1434 slip 597 相关系数  
+412 smartwater 顺应性测试后夹持+0 上升速度5 一直在缓慢滑动不调变 diff_force:6.867 catch 433 release 1434 slip 597 相关系数 
+
+
+
+500 红色乐事薯片 顺应性测试后夹持+0 上升速度10 不滑动  diff_force:2.887  catch:876 release:3861
+501 红色乐事薯片 顺应性测试后夹持+0 上升速度10 不滑动  diff_force:2.918  catch:885 release:3870
+502 红色乐事薯片 顺应性测试后夹持+0 上升速度10 不滑动  diff_force:3.021  catch:885 release:4063
+503 椰汁       顺应性测试后夹持+0 上升速度10 不滑动  diff_force:8.589  catch:835 release:3760
+504 椰汁       顺应性测试后夹持+0 上升速度10 不滑动  diff_force:9.356  catch:848 release:3796
+505 椰汁       顺应性测试后夹持+0 上升速度10 不滑动  diff_force:9.203  catch:860 release:3809
+506 满罐可乐    顺应性测试后夹持+0 上升速度10 不滑动  diff_force:13.547  catch:828 release:3768
+507 满罐可乐    顺应性测试后夹持+0 上升速度10 不滑动  diff_force:13.787  catch:850 release:3798
+508 满罐可乐    顺应性测试后夹持+0 上升速度10 不滑动  diff_force:8.960  catch:850 release:3802
+509 海绵       顺应性测试后夹持+0 上升速度10 不滑动  diff_force:3.655  catch:901 release:3837
+510 海绵       顺应性测试后夹持+0 上升速度10 不滑动  diff_force:3.568  catch:901 release:3852
+511 海绵       顺应性测试后夹持+0 上升速度10 不滑动  diff_force:2.488  catch:901 release:3829
+512 空罐可乐   顺应性测试后夹持+0 上升速度10 不滑动  diff_force:2.668  catch:832 release:3756
+513 空罐可乐   顺应性测试后夹持+0 上升速度10 不滑动  diff_force:2.852  catch:849 release:3798
+514 空罐可乐   顺应性测试后夹持+0 上升速度10 不滑动  diff_force:3.565  catch:844 release:3788
+
+515 软番茄酱瓶  顺应性测试后夹持+0 上升速度10 滑动  diff_force:4.808  catch:817 release:3759
+516 软番茄酱瓶  顺应性测试后夹持+0 上升速度10 滑动  diff_force:4.659  catch:794 release:3736
+517 软番茄酱瓶  顺应性测试后夹持+0 上升速度10 滑动  diff_force:5.341  catch:814 release:3747
+518 软番茄酱瓶  顺应性测试后夹持+0 上升速度10 滑动  diff_force:3.884  catch:821 release:3754
+519 软番茄酱瓶  顺应性测试后夹持+0 上升速度10 滑动  diff_force:1.709  catch:837 release:3782
+519 软番茄酱瓶  顺应性测试后夹持+0 上升速度10 滑动  diff_force:1.709  catch:837 release:3782
+520 软番茄酱瓶  顺应性测试后夹持+0 上升速度10 不滑动  diff_force:1.481  catch:837 release:3772
+
+521 大瓶雪碧   顺应性测试后夹持+0 上升速度10 滑动  diff_force:1.286  catch:726 release:3667
+522 大瓶雪碧   顺应性测试后夹持+0 上升速度10 滑动  diff_force:2.500  catch:722 release:3663
+523 大瓶雪碧   顺应性测试后夹持+0 上升速度10 滑动  diff_force:2.892  catch:732 release:3682
+524 大瓶雪碧   顺应性测试后夹持+0 上升速度10 滑动  diff_force:2.236  catch:732 release:3679
+525 大瓶雪碧   顺应性测试后夹持+0 上升速度10 滑动  diff_force:-0.181  catch:723 release:3657
+526 大瓶雪碧   顺应性测试后夹持+0 上升速度10 滑动  diff_force:2.688  catch:716 release:3647
+527 大瓶雪碧   顺应性测试后夹持+4 上升速度10 滑动  diff_force:2.402  catch:708 release:3641
+528 大瓶雪碧   顺应性测试后夹持+4 上升速度10 滑动  diff_force:1.086  catch:731 release:3644
+529 大瓶雪碧   顺应性测试后夹持+8 上升速度10 滑动  diff_force:0.389  catch:726 release:3664
+530 大瓶雪碧   顺应性测试后夹持+8 上升速度10 滑动  diff_force:1.486  catch:730 release:3663
+531 大瓶雪碧   顺应性测试后夹持+8 上升速度10 滑动  diff_force:2.980  catch:716 release:3651
+532 大瓶雪碧   顺应性测试后夹持+8 上升速度10 滑动  diff_force:2.504  catch:726 release:3642
+533 大瓶雪碧   顺应性测试后夹持+12 上升速度10 略滑动  diff_force:2.325  catch:739 release:3672
+534 大瓶雪碧   顺应性测试后夹持+12 上升速度10 不滑动  diff_force:1.908  catch:712 release:3638
+535 大瓶雪碧   顺应性测试后夹持+12 上升速度10 滑动  diff_force:2.558  catch:724 release:3662
+微旋转末端后
+536 大瓶雪碧   顺应性测试后夹持+12 上升速度10 滑动  diff_force:0.747  catch:732 release:3684
+537 大瓶雪碧   顺应性测试后夹持+12 上升速度10 不滑动  diff_force:0.478  catch:728 release:3661
+538 大瓶雪碧   顺应性测试后夹持+14 上升速度10 不滑动  diff_force:0.698  catch:732 release:3659
+539 大瓶雪碧   顺应性测试后夹持+14 上升速度10 不滑动  diff_force:1.338  catch:740 release:3680
+
+540 包子模型   顺应性测试后夹持+0  上升速度10 不滑动  diff_force:0.292  catch:821 release:3771
+541 包子模型   顺应性测试后夹持+0  上升速度10 不滑动  diff_force:0.323  catch:887 release:3819
+542 包子模型   顺应性测试后夹持+0  上升速度10 不滑动  diff_force:0.457  catch:891 release:3829
+降低接触阈值后 0.3 -50
+543 包子模型   顺应性测试后夹持+0  上升速度10 不滑动  diff_force:0.289  catch:857 release:3796
+544 包子模型   顺应性测试后夹持+0  上升速度10 不滑动  diff_force:0.195  catch:824 release:3734
+545 包子模型   顺应性测试后夹持+0  上升速度10 不滑动  diff_force:0.324  catch:824 release:3783
+恢复阈值
+546 smartwater 顺应性测试后夹持+0  上升速度10 不滑动  diff_force:11.983  catch:789 release:3730
+547 smartwater 顺应性测试后夹持+0  上升速度10 不滑动  diff_force:11.786  catch:795 release:3747
+548 smartwater 顺应性测试后夹持+0  上升速度10 不滑动  diff_force:11.139  catch:790 release:3727
+549 西柚汁     顺应性测试后夹持+0  上升速度10 滑动  diff_force:1.189  catch:760 release:3715
+550 西柚汁     顺应性测试后夹持+0  上升速度10 滑动  diff_force:1.412  catch:762 release:3720
+551 西柚汁     顺应性测试后夹持+0  上升速度10 滑动  diff_force:1.842  catch:754 release:3666
+552 西柚汁     顺应性测试后夹持+4  上升速度10 滑动  diff_force:-0.168  catch:755 release:3684
+553 西柚汁     顺应性测试后夹持+4  上升速度10 滑动  diff_force:-0.318  catch:756 release:3689
+554 西柚汁     顺应性测试后夹持+4  上升速度10 滑动  diff_force:0.909  catch:771 release:3688
+555 西柚汁     顺应性测试后夹持+4  上升速度10 滑动  diff_force:0.638  catch:760 release:3690
+556 西柚汁     顺应性测试后夹持+8  上升速度10 顿滑动  diff_force:1.809  catch:761 release:3665
+557 西柚汁     顺应性测试后夹持+8  上升速度10 不滑动  diff_force:2.436  catch:777 release:3721
+558 西柚汁     顺应性测试后夹持+8  上升速度10 不滑动  diff_force:-0.366  catch:751 release:3687
+559 西柚汁     顺应性测试后夹持+8  上升速度10 顿滑动  diff_force:4.413  catch:781 release:3721
+560 西柚汁     顺应性测试后夹持+12 上升速度10 顿滑动  diff_force:0.725  catch:764 release:3720
+561 西柚汁     顺应性测试后夹持+12 上升速度10 起步轻微滑动 后也有少许顿滑动  diff_force:1.585  catch:773 release:3717
+562 西柚汁     顺应性测试后夹持+12 上升速度10 少许顿滑动  diff_force:0.895  catch:760 release:3710
+563 西柚汁     顺应性测试后夹持+12 上升速度10 少许顿滑动  diff_force:0.427  catch:760 release:3703
+564 西柚汁     顺应性测试后夹持+14 上升速度10 不滑动  diff_force:0.427  catch:760 release:3703
+565 西柚汁     顺应性测试后夹持+14 上升速度10 不滑动  diff_force:2.134  catch:766 release:3712
+566 西柚汁     顺应性测试后夹持+14 上升速度10 不滑动  diff_force:2.370  catch:770 release:3696
+567 硬壳番茄酱  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:10.458  catch:850 release:3776
+568 硬壳番茄酱  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:13.163  catch:857 release:3801
+
+降低接触阈值后 0.3 -50
+569 绿葡萄  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:5.912  catch:904
+570 绿葡萄  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:1.808  catch:874
+571 绿葡萄  顺应性测试后夹持+0  上升速度10 不滑动，偏上  diff_force:1.622  catch:885
+572 绿葡萄  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:0.838  catch:875
+573 绿葡萄  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:6.385  catch:885
+
+恢复阈值
