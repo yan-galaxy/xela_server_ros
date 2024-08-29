@@ -35,12 +35,19 @@ class Robotiq3f_Serial_Node:
         # 第一个字节 Register: ACTION REQUEST    4:rATR      3:rGTO 2-1:rMOD 0:rACT 
         # rATR: 0: normal     1: Emergency auto-release
         # rGTO: 0: stop       1: move
+        # rMOD: 
+        # 0x0:Basic Mode 
+        # 0x1:Pinch Mode 
+        # 0x02:Wide Mode 
+        # 0x03:Scissor Mode
         # rACT: 0: deactivate 1: activate
+        
         # 第二个字节 Register: GRIPPER OPTION 1 
 
         # 0x00,0x00 write to 03EA  后一个字节是位置
         # 0x00,0x00 write to 03EB  速度和力
 
+        self.ctrl_data[7]=0x0B  # 09 是普通模式  0B是Pinch模式  0D是Wide模式  0F是Scissor模式
         self.ctrl_data[10]=0  #postion
         self.ctrl_data[11]=0  #speed
         self.ctrl_data[12]=0  #current
@@ -54,7 +61,7 @@ class Robotiq3f_Serial_Node:
         # 0x02 num of write bytes 
 
         # 0x01,0x00 write to 03E9  
-        # 第一个字节 Register: ACTION REQUEST    4:rATR      3:rGTO 2-1:rMOD 0:rACT 
+        # 第一个字节 Register: ACTION REQUEST    4:rATR   3:rGTO 2-1:rMOD 0:rACT 
         # rATR: 0: normal     1: Emergency auto-release
         # rGTO: 0: stop       1: move
         # rACT: 0: deactivate 1: activate

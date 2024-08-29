@@ -5,6 +5,8 @@
 
 #include <atomic>
 #include <csignal>
+#include <string>
+#include <sstream>
 
 #include <opencv2/opencv.hpp>
 #include "opencv2/core.hpp"
@@ -408,7 +410,7 @@ int camera_proj()
 
     double width=1280;
     double height=720;
-    double fps = capture.get(cv::CAP_PROP_FPS);
+    double fps = 16;
 
     // 定义MP4视频文件的路径
     std::string videoFile = "/home/galaxy/Desktop/Xela_ws/src/threed_viz/video/output.mp4";
@@ -423,14 +425,35 @@ int camera_proj()
     }
 
     cv::Mat frame;
-    for(int i=0;i<300;i++)
-    // while (1) 
+    double time_record=0;
+    // for(int i=0;i<150;i++)
+    while (1) 
     {
         capture.read(frame); // 读取帧
         if (frame.empty()) {
             std::cerr << "无法读取帧" << std::endl;
             break;
         }
+
+
+        time_record = xsen_record_cnt/100.0;
+         // 使用 std::ostringstream 并设置精度为2位小数
+        std::ostringstream oss;
+        oss.precision(2); // 设置精度为2位小数
+        oss << std::fixed << time_record; // 使用 fixed 标志确保使用定点格式
+        std::string text = "Time:" + oss.str() + "s";// 将 ostringstream 对象的内容转换为 std::string
+        // std::string text = "Hello, OpenCV!"+std::to_string(xsen_record_cnt-time_record);
+        // time_record=xsen_record_cnt;
+
+        // 文本的坐标位置
+        int x = 20; // x坐标
+        int y = 20; // y坐标
+        int fontFace = cv::FONT_HERSHEY_SIMPLEX;// 选择字体
+        double fontScale = 0.5;// 字体大小
+        cv::Scalar color(0, 0, 255); // 颜色（BGR）
+        int thickness = 1;// 线厚度
+        cv::putText(frame, text, cv::Point(x, y), fontFace, fontScale, color, thickness);// 使用 putText() 函数在图片上打印文本
+
         // 写入帧到MP4视频文件
         videoWriter.write(frame);
 
@@ -457,7 +480,7 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
         robotiq_Ctrl_Once(0,250,0);
         sleep(3);
     }
-    robotiq_Ctrl_Once(105,0,0);//合拢
+    robotiq_Ctrl_Once(100,0,0);//合拢
     ROS_INFO("motion");
     uint8_t xsen_touch_flag = 0;
     uint8_t stm32_touch_flag = 0;
@@ -633,12 +656,14 @@ int main( int argc, char** argv )
     ros::Subscriber sub3 = n3.subscribe("robotiq3f_feedback", 1000, robotiq3f_fb_callback);
     ros::Publisher robotiq_Ctrl_info_pub = n3.advertise<threed_viz::robotiq3fctrl>("/robotiq3fctrl", 10);
     ros::Rate loop_rate_pub(200);
-    
+
+    std::thread camera_proj_thread(camera_proj);
+
     std::thread ros_robotiq_Ctrl_pub_thread(robotiq_Ctrl_pub,robotiq_Ctrl_info_pub,loop_rate_pub); 
     
     std::thread main_proj_thread(main_proj,robotiq_Ctrl_info_pub);
     
-    std::thread camera_proj_thread(camera_proj);
+    
 
     ros::spin();
     camera_proj_thread.join();
