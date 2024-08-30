@@ -175,4 +175,77 @@ smartwater
 572 绿葡萄  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:0.838  catch:875
 573 绿葡萄  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:6.385  catch:885
 
-恢复阈值
+恢复阈值  -70
+574 包子模型 横着夹   顺应性测试后夹持+0  上升速度10 不滑动  diff_force:0.273  catch:1048 
+575 包子模型 横着夹   顺应性测试后夹持+0  上升速度10 不滑动  diff_force:0.221  catch:1052 
+
+降低接触阈值后 0.3 -50
+576 包子模型 竖着夹   顺应性测试后夹持+0  上升速度10 不滑动  diff_force:0.149  catch:1110
+
+-60
+577 包子模型 竖着夹   顺应性测试后夹持+0  上升速度10 不滑动  diff_force:0.300  catch:1133
+578 薯片   顺应性测试后夹持+0  上升速度10 不滑动  diff_force:11.254  catch:1184
+579 薯片   夹持+0  上升速度10 不滑动  diff_force:11.254  catch:972
+580 薯片   夹持+0  上升速度10 不滑动  diff_force:11.254  catch:968
+
+-70
+581 橘子 竖着夹   顺应性测试后夹持+0  上升速度10 不滑动  diff_force:3.726  catch:1103
+582 橘子 竖着夹   顺应性测试后夹持+0  上升速度10 不滑动  diff_force:5.507  catch:1118
+583 橘子 横着夹 头朝下  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:5.092  catch:1087
+584 橘子 横着夹 头朝上  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:3.598  catch:1087
+585 猕猴桃  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:5.805  catch:1121
+586 猕猴桃  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:8.263  catch:1121
+587 猕猴桃  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:5.172  catch:1124
+588 猕猴桃  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:8.072  catch:1126
+589 月饼  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:8.152  catch:1170
+590 月饼  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:9.799  catch:1181
+591 千层卷  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:1.290  catch:1148
+592 千层卷  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:2.873  catch:1176
+593 蒸蛋糕卷  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:1.928  catch:1187
+594 蒸蛋糕卷  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:1.687  catch:1176
+595 肉松蛋糕  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:1.485  catch:1161
+596 肉松蛋糕  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:2.127  catch:1179
+597 肉松蛋糕  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:1.434  catch:1173
+598 纸盒王老吉  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:10.082  catch:1154
+599 纸盒王老吉  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:7.395  catch:1154
+
+600 自己水杯  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:15.291  catch:1084  release:4037
+601 自己水杯  顺应性测试后夹持+0  上升速度10 不滑动  diff_force:12.696  catch:1076  release:4006
+
+602 雪碧大瓶  顺应性测试后夹持+0  上升速度30 滑动  diff_force:1.702  catch:998
+603 雪碧大瓶  顺应性测试后夹持+4  上升速度30 滑动  diff_force:1.757  catch:994
+604 雪碧大瓶  顺应性测试后夹持+8  上升速度30 滑动  diff_force:0.925  catch:1006 release:3944
+605 雪碧大瓶  顺应性测试后夹持+8  上升速度30 滑动  diff_force:1.058  catch:990  release:3945
+606 雪碧大瓶  顺应性测试后夹持+8  上升速度30 顿滑动  diff_force:2.668  catch:1007  release:3966
+607 雪碧大瓶  顺应性测试后夹持+8  上升速度30 顿滑动  diff_force:0.237  catch:991  release:3942
+609 雪碧大瓶  顺应性测试后夹持+12  上升速度30 顿滑动  diff_force:0.460  catch:987  release:3925
+610 雪碧大瓶  顺应性测试后夹持+12  上升速度30 顿滑动  diff_force:0.385  catch:991  release:3934
+611 雪碧大瓶  顺应性测试后夹持+12  上升速度30 滑动  diff_force:1.943  catch:990  release:3931
+612 雪碧大瓶  顺应性测试后夹持+14  上升速度30 略滑动  diff_force:1.191  catch:1001  release:3943
+613 雪碧大瓶  顺应性测试后夹持+14  上升速度30 略滑动  diff_force:0.351  catch:983  release:3894
+614 雪碧大瓶  顺应性测试后夹持+14  上升速度30 滑动  diff_force:2.070  catch:1002  release:3939
+615 雪碧大瓶  顺应性测试后夹持+16  上升速度30 略滑动  diff_force:2.009  catch:999  release:3935
+616 雪碧大瓶  顺应性测试后夹持+16  上升速度30 略滑动  diff_force:2.234  catch:985  release:3937
+617 雪碧大瓶  顺应性测试后夹持+20 speed 50  上升速度30 略滑动  diff_force:2.036  catch:980  release:3900
+618 雪碧大瓶  顺应性测试后夹持+20 current 100  上升速度30 不滑动  diff_force:0.875  catch:994  release:3924
+619 雪碧大瓶  顺应性测试后夹持+20 current 100  上升速度30 不滑动  diff_force:0.973  catch:997  release:3951
+
+620 西柚汁  顺应性测试后夹持+0  上升速度30 滑动  diff_force:2.950  catch:1057  release:3985
+621 西柚汁  顺应性测试后夹持+8  上升速度30 滑动  diff_force:3.570  catch:1047  release:3986
+622 西柚汁  顺应性测试后夹持+12  上升速度30 微滑动  diff_force:1.649  catch:1066  release:4014
+623 西柚汁  顺应性测试后夹持+12  上升速度30 微滑动  diff_force:-0.523  catch:1062  release:4022
+624 西柚汁  顺应性测试后夹持+12  上升速度30 微滑动  diff_force:3.096  catch:1053  release:4001
+625 西柚汁  顺应性测试后夹持+14  上升速度30 微滑动  diff_force:2.568  catch:1046  release:3977
+626 西柚汁  顺应性测试后夹持+14 speed 100 上升速度30 不滑动  diff_force:0.646 catch:1043  release:3986
+627 西柚汁  顺应性测试后夹持+14 speed 100 上升速度30 不滑动  diff_force:0.868 catch:1049  release:4011
+628 西柚汁  顺应性测试后夹持+14 speed 100 上升速度30 不滑动  diff_force:1.459 catch:1064  release:3996
+
+629 软番茄酱瓶  顺应性测试后夹持+0 speed 50 上升速度30 滑动  diff_force:4.076 catch:1078  release:4025
+630 软番茄酱瓶  顺应性测试后夹持+0 speed 50 上升速度30 滑动  diff_force:4.111 catch:1082  release:4041
+631 软番茄酱瓶  顺应性测试后夹持+4 speed 50 上升速度30 不滑动  diff_force:6.168 catch:1078  release:4018
+632 软番茄酱瓶  顺应性测试后夹持+4 speed 50 上升速度30 不滑动  diff_force:5.890 catch:1085  release:4023
+
+
+
+633 黑梅  顺应性测试后夹持+0 上升速度30 不滑动  diff_force:4.379 catch:1198 
+634 黑梅  顺应性测试后夹持+0 上升速度30 不滑动  diff_force:3.645 catch:1190 
