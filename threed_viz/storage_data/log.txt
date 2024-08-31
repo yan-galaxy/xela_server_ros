@@ -297,7 +297,7 @@ smartwater
 673 包子模型（竖着）current:100
 674 无盖杯子    current:100
 675 包子模型（横着）current:100
-
+676 软番茄酱瓶  current:100
 
 
 
