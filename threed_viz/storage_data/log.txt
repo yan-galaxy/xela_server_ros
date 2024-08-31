@@ -287,6 +287,17 @@ smartwater
 668 软番茄酱瓶  顺应性测试后夹持+4 上升速度5 不滑动  diff_force:3.399 catch:1075  release:4017
 
 
+669 空百岁山瓶  顺应性测试后夹持+0 上升速度10 不滑动  diff_force:2.383 catch:1121  release:4078
+
+
+不用触觉反馈：
+670 空百岁山瓶  current:50
+671 空罐可乐    current:100
+672 海绵       current:100
+673 包子模型（竖着）current:100
+674 无盖杯子    current:100
+675 包子模型（横着）current:100
+
 
 
 
