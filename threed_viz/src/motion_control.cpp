@@ -614,7 +614,7 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
                 grasp_pos=(uint8_t)(diff_force/4);
                 if(grasp_pos>16)grasp_pos=16;
 
-                robotiq_Ctrl_Once(touch_pos+grasp_pos,20,0);
+                robotiq_Ctrl_Once(touch_pos+grasp_pos+4,20,0);
                 // usleep(1000*10000);
                 // for(size_t i=0;i<50;i++)
                 // {

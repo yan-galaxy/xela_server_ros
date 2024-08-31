@@ -246,6 +246,47 @@ smartwater
 632 软番茄酱瓶  顺应性测试后夹持+4 speed 50 上升速度30 不滑动  diff_force:5.890 catch:1085  release:4023
 
 
-
 633 黑梅  顺应性测试后夹持+0 上升速度30 不滑动  diff_force:4.379 catch:1198 
 634 黑梅  顺应性测试后夹持+0 上升速度30 不滑动  diff_force:3.645 catch:1190 
+
+635 雪碧大瓶  顺应性测试后夹持+0 上升速度5 滑动  diff_force:1.309 catch:1002  release:3959
+636 雪碧大瓶  顺应性测试后夹持+0 上升速度5 滑动  diff_force:1.309 catch:997   release:3961
+637 雪碧大瓶  顺应性测试后夹持+4 上升速度5 滑动  diff_force:1.021 catch:995   release:3966
+638 雪碧大瓶  顺应性测试后夹持+4 上升速度5 滑动  diff_force:1.142 catch:1000  release:3935
+639 雪碧大瓶  顺应性测试后夹持+8 上升速度5 滑动  diff_force:0.812 catch:993   release:3940
+640 雪碧大瓶  顺应性测试后夹持+8 上升速度5 顿滑动  diff_force:0.398 catch:1000  release:3950
+641 雪碧大瓶  顺应性测试后夹持+8 上升速度5 不滑动  diff_force:1.861 catch:1029  release:3962
+642 雪碧大瓶  顺应性测试后夹持+12 上升速度5 顿滑动  diff_force:1.557 catch:1001  release:3923
+643 雪碧大瓶  顺应性测试后夹持+12 上升速度5 顿滑动  diff_force:1.083 catch:1007  release:3961
+644 雪碧大瓶  顺应性测试后夹持+12 上升速度5 顿滑动  diff_force:1.079 catch:1004  release:3959
+645 雪碧大瓶  顺应性测试后夹持+14 上升速度5 不滑动  diff_force:2.526 catch:1014  release:3954
+646 雪碧大瓶  顺应性测试后夹持+14 上升速度5 顿滑动  diff_force:0.344 catch:1010  release:3935
+647 雪碧大瓶  顺应性测试后夹持+14 上升速度5 顿滑动  diff_force:0.147 catch:1024  release:3958
+648 雪碧大瓶  顺应性测试后夹持+16 speed 100 上升速度5 顿滑动  diff_force:0.575 catch:1011  release:3952
+649 雪碧大瓶  顺应性测试后夹持+16 speed 100 上升速度5 顿滑动  diff_force:2.299 catch:1015  release:3945
+650 雪碧大瓶  顺应性测试后夹持+16 current 100 上升速度5 微滑动  diff_force:1.411 catch:1066  release:3955
+651 雪碧大瓶  顺应性测试后夹持+16 current 100 上升速度5 不滑动  diff_force:1.900 catch:1046  release:3994
+652 雪碧大瓶  顺应性测试后夹持+16 current 100 上升速度5 不滑动  diff_force:2.430 catch:1031  release:3969
+
+653 西柚汁  顺应性测试后夹持+0 上升速度5 滑动  diff_force:1.518 catch:1063  release:4005
+654 西柚汁  顺应性测试后夹持+0 上升速度5 滑动  diff_force:1.947 catch:1060  release:4009
+655 西柚汁  顺应性测试后夹持+4 上升速度5 滑动  diff_force:1.019 catch:1056  release:4003
+656 西柚汁  顺应性测试后夹持+4 上升速度5 滑动  diff_force:2.486 catch:1057  release:4010
+657 西柚汁  顺应性测试后夹持+8 上升速度5 滑动  diff_force:1.126 catch:1052  release:3978
+658 西柚汁  顺应性测试后夹持+8 上升速度5 滑动  diff_force:-0.023 catch:1059  release:3986
+659 西柚汁  顺应性测试后夹持+12 上升速度5 微滑动  diff_force:-2.775 catch:1049  release:3983
+660 西柚汁  顺应性测试后夹持+12 上升速度5 不滑动  diff_force:2.578 catch:1068  release:4018
+661 西柚汁  顺应性测试后夹持+12 上升速度5 不滑动  diff_force:2.480 catch:1056  release:3985
+662 西柚汁  顺应性测试后夹持+14 上升速度5 不滑动  diff_force:2.313 catch:1054  release:3978
+
+663 软番茄酱瓶  顺应性测试后夹持+0 上升速度5 微小持续滑动  diff_force:3.823 catch:1078  release:4004
+664 软番茄酱瓶  顺应性测试后夹持+0 上升速度5 微小持续滑动  diff_force:2.199 catch:1098  release:4047
+665 软番茄酱瓶  顺应性测试后夹持-1 上升速度5 微小持续滑动  diff_force:1.985 catch:1072  release:4005
+666 软番茄酱瓶  顺应性测试后夹持-1 上升速度5 微小持续滑动  diff_force:2.318 catch:1075  release:4011
+667 软番茄酱瓶  顺应性测试后夹持+4 上升速度5 不滑动  diff_force:3.973 catch:1074  release:3998
+668 软番茄酱瓶  顺应性测试后夹持+4 上升速度5 不滑动  diff_force:3.399 catch:1075  release:4017
+
+
+
+
+
