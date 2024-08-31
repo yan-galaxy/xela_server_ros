@@ -512,7 +512,13 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
         robotiq_Ctrl_Once(0,250,0);
         sleep(2);
     }
-    robotiq_Ctrl_Once(100,0,0);//合拢
+    // robotiq_Ctrl_Once(100,0,0);//合拢
+    robotiq_Ctrl_Once(100,0,0);//不使用触觉传感器
+    sleep(2);
+    robotiq_Ctrl_Once(100,0,100);//不使用触觉传感器
+    sleep(2);
+    while(1);
+    
     ROS_INFO("motion");
     uint8_t xsen_touch_flag = 0;
     uint8_t stm32_touch_flag = 0;
