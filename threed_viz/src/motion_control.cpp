@@ -611,7 +611,7 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
 
     ROS_INFO("10:%4.2lf,11:%4.2lf,3:%4.2lf,5:%4.2lf",
     start_st10,start_st11,start_st3,start_st5);
-    // sleep(5);
+    sleep(2);
 
     usleep(1000*500);
     
@@ -766,6 +766,9 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
                 //     usleep(1000*100);
                     
                 // }
+
+
+
 
                 for(size_t i=0;i<1000;i++)
                 {
