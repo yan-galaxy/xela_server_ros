@@ -224,26 +224,85 @@ std::string savepath = "/home/galaxy/Desktop/Xela_ws/src/threed_viz/data/";
 
 uint32_t xsen_record_cnt = 0;
 uint8_t slip_flag = 0;
-void stm32sen_callback(const sensor_brainco::stm32data::ConstPtr& msg)
-{
-    memcpy(&stm32data_msg,msg.get(),128);
-    // ROS_INFO("10:%4d,11:%4d,3:%4d,5:%4d",stm32data_msg.voltage[10],stm32data_msg.voltage[11],stm32data_msg.voltage[3],stm32data_msg.voltage[5]);
-    stm32filter_3=filter_3.process(stm32data_msg.voltage[3]);
-    stm32filter_5=filter_5.process(stm32data_msg.voltage[5]);
-    stm32filter_10=filter_10.process(stm32data_msg.voltage[10]);
-    stm32filter_11=filter_11.process(stm32data_msg.voltage[11]);
-    
-    // saveDataToFile(savepath+"stm32raw3.txt", stm32data_msg.voltage[3]);
-    // saveDataToFile(savepath+"stm32raw5.txt", stm32data_msg.voltage[5]);
-    // saveDataToFile(savepath+"stm32raw10.txt", stm32data_msg.voltage[10]);
-    // saveDataToFile(savepath+"stm32raw11.txt", stm32data_msg.voltage[11]);
+// 定义一个结构体来存储滑动窗口中的数据
+struct Window {
+    std::vector<double> t;
+    std::vector<double> value;
+    size_t size;
+};
 
-    // saveDataToFile(savepath+"stm32fil3.txt", stm32filter_3);
-    // saveDataToFile(savepath+"stm32fil5.txt", stm32filter_5);
-    // saveDataToFile(savepath+"stm32fil10.txt", stm32filter_10);
-    // saveDataToFile(savepath+"stm32fil11.txt", stm32filter_11);
-
+// 计算滑动窗口中的平均值
+double mean(const std::vector<double>& data) {
+    double sum = 0.0;
+    for (double value : data) {
+        sum += value;
+    }
+    return sum / data.size();
 }
+
+// 计算滑动窗口中 x 和 y 的协方差
+double covariance(const std::vector<double>& x, const std::vector<double>& y) {
+    double meanX = mean(x);
+    double meanY = mean(y);
+    double sum = 0.0;
+    for (size_t i = 0; i < x.size(); ++i) {
+        sum += (x[i] - meanX) * (y[i] - meanY);
+    }
+    return sum;
+}
+
+// 计算滑动窗口中 x 的方差
+double variance(const std::vector<double>& x) {
+    double meanX = mean(x);
+    double sum = 0.0;
+    for (double value : x) {
+        sum += (value - meanX) * (value - meanX);
+    }
+    return sum;
+}
+
+// 计算最小二乘法的斜率
+double calculateSlope(const std::vector<double>& x, const std::vector<double>& y) {
+    double numerator = covariance(x, y);
+    double denominator = variance(x);
+    if (denominator == 0) {
+        return std::numeric_limits<double>::quiet_NaN(); // 返回 NaN
+    }
+    return numerator / denominator;
+}
+
+// 计算最小二乘法的截距
+double calculateIntercept(const std::vector<double>& x, const std::vector<double>& y, double slope) {
+    double meanX = mean(x);
+    double meanY = mean(y);
+    return meanY - slope * meanX;
+}
+
+// 计算均方根误差 (RMSE)
+double calculateRMSE(const std::vector<double>& x, const std::vector<double>& y, double slope, double intercept) {
+    double sum = 0.0;
+    for (size_t i = 0; i < x.size(); ++i) {
+        double predictedY = slope * x[i] + intercept;
+        sum += (y[i] - predictedY) * (y[i] - predictedY);
+    }
+    return std::sqrt(sum / x.size());
+}
+
+// 更新滑动窗口
+void updateWindow(Window& window, double x, double y) {
+    if (window.t.size() == window.size) {
+        window.t.erase(window.t.begin());
+        window.value.erase(window.value.begin());
+    }
+    window.t.push_back(x);
+    window.value.push_back(y);
+}
+
+Window window_x = {{}, {}, 20};//滑动窗口
+// Window window_z = {{}, {}, 50};//滑动窗口
+double slope;
+double intercept;
+double rmse;
 void xsen_callback(const xela_server_ros::SensStream::ConstPtr& msg)
 {
     xsen_record_cnt++;
@@ -297,6 +356,32 @@ void xsen_callback(const xela_server_ros::SensStream::ConstPtr& msg)
         sen_all.len=std::sqrt(sen_all.x * sen_all.x + sen_all.y * sen_all.y + sen_all.z * sen_all.z);
         // ROS_INFO("ALL X: %f, Y: %f, Z: %f,len: %f",sen_all.x ,sen_all.y ,sen_all.z,sen_all.len);
 
+        // 更新窗口
+        updateWindow(window_x, xsen_record_cnt*0.01, sen_all.x);
+
+        // 确保窗口中有50个数据点后开始计算和写入斜率、RMSE
+        if (window_x.t.size() == window_x.size) {
+            // 计算最小二乘法的参数
+            slope = calculateSlope(window_x.t, window_x.value);
+            intercept = calculateIntercept(window_x.t, window_x.value, slope);
+
+            // // 检查斜率是否为 NaN
+            // if (std::isnan(slope)) {
+            //     std::cout << "Error: Division by zero in slope calculation." << std::endl;
+            //     continue;
+            // }
+
+            // 计算 RMSE
+            rmse = calculateRMSE(window_x.t, window_x.value, slope, intercept);
+
+            saveDataToFile(savepath+"x_slope.txt", slope);
+            saveDataToFile(savepath+"x_RMSE.txt", rmse);
+        }
+
+
+
+
+        /* 相关系数检测
         static uint8_t run_stat=0;
         if(vecx.size()<5)
         {
@@ -358,9 +443,29 @@ void xsen_callback(const xela_server_ros::SensStream::ConstPtr& msg)
                     break;
             }
         }
-
+        */
         
     }
+}
+void stm32sen_callback(const sensor_brainco::stm32data::ConstPtr& msg)
+{
+    memcpy(&stm32data_msg,msg.get(),128);
+    // ROS_INFO("10:%4d,11:%4d,3:%4d,5:%4d",stm32data_msg.voltage[10],stm32data_msg.voltage[11],stm32data_msg.voltage[3],stm32data_msg.voltage[5]);
+    stm32filter_3=filter_3.process(stm32data_msg.voltage[3]);
+    stm32filter_5=filter_5.process(stm32data_msg.voltage[5]);
+    stm32filter_10=filter_10.process(stm32data_msg.voltage[10]);
+    stm32filter_11=filter_11.process(stm32data_msg.voltage[11]);
+    
+    // saveDataToFile(savepath+"stm32raw3.txt", stm32data_msg.voltage[3]);
+    // saveDataToFile(savepath+"stm32raw5.txt", stm32data_msg.voltage[5]);
+    // saveDataToFile(savepath+"stm32raw10.txt", stm32data_msg.voltage[10]);
+    // saveDataToFile(savepath+"stm32raw11.txt", stm32data_msg.voltage[11]);
+
+    // saveDataToFile(savepath+"stm32fil3.txt", stm32filter_3);
+    // saveDataToFile(savepath+"stm32fil5.txt", stm32filter_5);
+    // saveDataToFile(savepath+"stm32fil10.txt", stm32filter_10);
+    // saveDataToFile(savepath+"stm32fil11.txt", stm32filter_11);
+
 }
 void robotiq3f_fb_callback(const threed_viz::robotiq3f_feedback::ConstPtr& msg)
 {
@@ -476,25 +581,26 @@ int camera_proj()
     return 0;
 }
 
+int Catch,lift_order,start_lift,stable;
 void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反馈数据fb
 {
     uint8_t run_stat=0;
     while(xsen_record_cnt<100);
-    // for(int i=0;i<100;i++)
-    // {
-    //     start_x+=sen_all.x;
-    //     start_y+=sen_all.y;
-    //     start_z+=sen_all.z;
+    for(int i=0;i<100;i++)
+    {
+        start_x+=sen_all.x;
+        start_y+=sen_all.y;
+        start_z+=sen_all.z;
 
-    //     start_st3+=stm32data_msg.voltage[3];
-    //     start_st5+=stm32data_msg.voltage[5];
-    //     start_st10+=stm32data_msg.voltage[10];
-    //     start_st11+=stm32data_msg.voltage[11];
-    //     usleep(1005*10);
-    // }
-    // start_x/=100.0;
-    // start_y/=100.0;
-    // start_z/=100.0;
+        start_st3+=stm32data_msg.voltage[3];
+        start_st5+=stm32data_msg.voltage[5];
+        start_st10+=stm32data_msg.voltage[10];
+        start_st11+=stm32data_msg.voltage[11];
+        usleep(1005*10);
+    }
+    start_x/=100.0;
+    start_y/=100.0;
+    start_z/=100.0;
     // start_st3/=100.0;
     // start_st5/=100.0;
     // start_st10/=100.0;
@@ -505,7 +611,9 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
 
     ROS_INFO("10:%4.2lf,11:%4.2lf,3:%4.2lf,5:%4.2lf",
     start_st10,start_st11,start_st3,start_st5);
-    sleep(5);
+    // sleep(5);
+
+    usleep(1000*500);
     
     if(robotiq3f_feedback_msg.A_position>20)
     {
@@ -532,13 +640,15 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
         switch(run_stat)
         {
             case 0:
-                if((sen_filter_z>0.07) || ((sen_all.z-start_z)>0.3) )//  存在高频信号或者阈值相比初始状态超过一定值
+                if((sen_filter_z>0.1) 
+                || ((sen_all.z-start_z)>1) 
+                )//  存在高频信号或者阈值相比初始状态超过一定值   0.07 0.3
                 {
                     if(xsen_touch_flag==0)
                     {
-                        if(sen_filter_z>0.07)
+                        if(sen_filter_z>0.1)
                             ROS_INFO("xsen_filter");
-                        else if((sen_all.z-start_z)>0.3)
+                        else if((sen_all.z-start_z)>1)
                             ROS_INFO("xsen_value");
                         ROS_INFO("xsen_touch_flag");
                         xsen_touch_flag = 1;
@@ -608,13 +718,15 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
                 
                 ROS_INFO("record_force: %.3f %.3f %.3f",record_force[0],record_force[1],record_force[2]);
                 ROS_INFO("diff_force: %.3f",diff_force);
+                saveDataToFile(savepath+"diff_force.txt", diff_force);
                 // ROS_INFO("compliance:%f mm/N",3.0/diff_force);
+                
                 
                 // run_stat=3;//松开结束
                 run_stat=2;//继续夹持
-                ROS_INFO("Catch");
-                ROS_INFO("run_stat:%d,xsen_cnt:%d",run_stat,xsen_record_cnt);
-
+                Catch=xsen_record_cnt;
+                ROS_INFO("Catch %d",Catch);
+                saveDataToFile(savepath+"Catch.txt", Catch);
                 break;
             
             case 2:
@@ -624,8 +736,23 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
                 robotiq_Ctrl_Once(touch_pos+grasp_pos,20,0);
                 // robotiq_Ctrl_Once(95,0,100);//力度最小去抓
 
+                usleep(1000*400);
 
-                // usleep(1000*10000);
+                // sleep(2);
+
+                lift_order=xsen_record_cnt;
+                ROS_INFO("lift_order %d",lift_order);
+                saveDataToFile(savepath+"lift_order.txt", lift_order);
+
+                while(fabs(slope)<0.8);
+                start_lift=xsen_record_cnt;
+                ROS_INFO("start_lift %d",start_lift);
+                saveDataToFile(savepath+"start_lift.txt", start_lift);
+                usleep(1000*500);
+
+                stable=xsen_record_cnt;
+                ROS_INFO("stable %d",stable);
+                saveDataToFile(savepath+"stable.txt", stable);
                 // for(size_t i=0;i<50;i++)
                 // {
                 //     if(slip_flag)
@@ -639,7 +766,33 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
                 //     usleep(1000*100);
                     
                 // }
-                sleep(15);
+
+                for(size_t i=0;i<1000;i++)
+                {
+                    if((fabs(slope)>1.3||rmse>0.3))
+                    {
+                        if(grasp_pos<16)
+                            grasp_pos+=2;
+                        else
+                        {
+                            ROS_INFO("plus press FULL");
+                            saveDataToFile(savepath+"full_time.txt", xsen_record_cnt);
+                        }
+                        robotiq_Ctrl_Once(touch_pos+grasp_pos,20,0);
+
+                        if(fabs(slope)>1.3)
+                            ROS_INFO("slope plus press");
+                        else if(rmse>0.3)
+                            ROS_INFO("rmse plus press");
+
+                        saveDataToFile(savepath+"plus_time.txt", xsen_record_cnt);
+                        usleep(1000*500);
+                    }
+                    usleep(1000*10);
+                    
+                }
+
+                // sleep(15);
                 ROS_INFO("down");
                 sleep(15);
                 // for(size_t i=0;i<50;i++)
@@ -706,6 +859,19 @@ int main( int argc, char** argv )
     clearFileContent(savepath+"filter_y.txt");
     clearFileContent(savepath+"filter_z.txt");
 
+    clearFileContent(savepath+"x_slope.txt");
+    clearFileContent(savepath+"x_RMSE.txt");
+
+    clearFileContent(savepath+"diff_force.txt");
+    clearFileContent(savepath+"Catch.txt");
+    clearFileContent(savepath+"lift_order.txt");
+    clearFileContent(savepath+"start_lift.txt");
+    clearFileContent(savepath+"stable.txt");
+
+    clearFileContent(savepath+"plus_time.txt");
+
+    clearFileContent(savepath+"full_time.txt");
+
     // clearFileContent(savepath+"stm32raw3.txt");
     // clearFileContent(savepath+"stm32raw5.txt");
     // clearFileContent(savepath+"stm32raw10.txt");
@@ -727,7 +893,7 @@ int main( int argc, char** argv )
     ros::Publisher robotiq_Ctrl_info_pub = n3.advertise<threed_viz::robotiq3fctrl>("/robotiq3fctrl", 10);
     ros::Rate loop_rate_pub(200);
 
-    // std::thread camera_proj_thread(camera_proj);
+    std::thread camera_proj_thread(camera_proj);
 
     std::thread ros_robotiq_Ctrl_pub_thread(robotiq_Ctrl_pub,robotiq_Ctrl_info_pub,loop_rate_pub); 
     
@@ -736,5 +902,5 @@ int main( int argc, char** argv )
     
 
     ros::spin();
-    // camera_proj_thread.join();
+    camera_proj_thread.join();
 }
