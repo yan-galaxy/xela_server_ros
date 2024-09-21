@@ -480,25 +480,25 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
 {
     uint8_t run_stat=0;
     while(xsen_record_cnt<100);
-    for(int i=0;i<100;i++)
-    {
-        start_x+=sen_all.x;
-        start_y+=sen_all.y;
-        start_z+=sen_all.z;
+    // for(int i=0;i<100;i++)
+    // {
+    //     start_x+=sen_all.x;
+    //     start_y+=sen_all.y;
+    //     start_z+=sen_all.z;
 
-        start_st3+=stm32data_msg.voltage[3];
-        start_st5+=stm32data_msg.voltage[5];
-        start_st10+=stm32data_msg.voltage[10];
-        start_st11+=stm32data_msg.voltage[11];
-        usleep(1005*10);
-    }
-    start_x/=100.0;
-    start_y/=100.0;
-    start_z/=100.0;
-    start_st3/=100.0;
-    start_st5/=100.0;
-    start_st10/=100.0;
-    start_st11/=100.0;
+    //     start_st3+=stm32data_msg.voltage[3];
+    //     start_st5+=stm32data_msg.voltage[5];
+    //     start_st10+=stm32data_msg.voltage[10];
+    //     start_st11+=stm32data_msg.voltage[11];
+    //     usleep(1005*10);
+    // }
+    // start_x/=100.0;
+    // start_y/=100.0;
+    // start_z/=100.0;
+    // start_st3/=100.0;
+    // start_st5/=100.0;
+    // start_st10/=100.0;
+    // start_st11/=100.0;
 
     ROS_INFO("start_z:%lf",
     start_z);
@@ -512,12 +512,12 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
         robotiq_Ctrl_Once(0,250,0);
         sleep(2);
     }
-    // robotiq_Ctrl_Once(100,0,0);//合拢
-    robotiq_Ctrl_Once(100,0,0);//不使用触觉传感器
-    sleep(2);
-    robotiq_Ctrl_Once(100,0,100);//不使用触觉传感器
-    sleep(2);
-    while(1);
+    robotiq_Ctrl_Once(100,0,0);//合拢
+    // robotiq_Ctrl_Once(100,0,0);//不使用触觉传感器
+    // sleep(2);
+    // robotiq_Ctrl_Once(100,0,100);//不使用触觉传感器
+    // sleep(2);
+    // while(1);
     
     ROS_INFO("motion");
     uint8_t xsen_touch_flag = 0;
@@ -575,7 +575,8 @@ void main_proj(ros::Publisher pub)//向brainco请求反馈数据,然后发布反
                 }
                     
 
-                if( xsen_touch_flag && stm32_touch_flag )//三个手指都接触 xsen_touch_flag && stm32_touch_flag
+                // if( xsen_touch_flag && stm32_touch_flag )//三个手指都接触 xsen_touch_flag && stm32_touch_flag
+                if( xsen_touch_flag )
                 {
                     ROS_INFO("touch");
                     touch_pos = robotiq3f_feedback_msg.A_position;
@@ -726,7 +727,7 @@ int main( int argc, char** argv )
     ros::Publisher robotiq_Ctrl_info_pub = n3.advertise<threed_viz::robotiq3fctrl>("/robotiq3fctrl", 10);
     ros::Rate loop_rate_pub(200);
 
-    std::thread camera_proj_thread(camera_proj);
+    // std::thread camera_proj_thread(camera_proj);
 
     std::thread ros_robotiq_Ctrl_pub_thread(robotiq_Ctrl_pub,robotiq_Ctrl_info_pub,loop_rate_pub); 
     
@@ -735,5 +736,5 @@ int main( int argc, char** argv )
     
 
     ros::spin();
-    camera_proj_thread.join();
+    // camera_proj_thread.join();
 }
