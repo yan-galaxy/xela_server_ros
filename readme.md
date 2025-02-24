@@ -275,3 +275,5 @@ sensors:
         z: 0.00609383312985301
 
 ```
+xela_viz与真实点位对应关系：
+![xela_viz与真实点位对应关系](./sensor_viz&real.png) 
