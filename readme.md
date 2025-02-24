@@ -76,6 +76,201 @@ sudo ./xela_linx/xela_server
 ```bash
 sudo ./xela_linx/xela_viz
 ```
-## ROS下消息传输
+## ROS下节点消息传输
+原代码工程中src/xela_server_ros/scripts/的xela_server有问题，修改后如下：
+```bash
+#!/bin/bash
 
+while true
 
+do
+
+params=("$@")
+
+filtered_params=()
+
+#printf '%s ' "${params[@]}"
+
+# Find and remove '--ros-args' and '--params-file' from the list
+while [[ " ${params[*]} " == *" --ros-args "* || " ${params[*]} " == *" --params-file "* ]]; do
+    index=$(( ${#params[@]} - 1 ))
+    for (( i=0; i<${#params[@]}; i++ )); do
+        if [ "${params[$i]}" == "--ros-args" ]; then
+            index=$i
+            #printf "\nFound '--ros-args' at index ${index}"
+            break
+        elif [ "${params[$i]}" == "--params-file" ]; then
+            index=$i
+            #printf "\nFound '--params-file' at index ${index}"
+            break
+        fi
+    done
+    params=("${params[@]:0:$index}" "${params[@]:$((index+2))}")
+
+    # Check if "--ros-args" includes "__node:=xela_server" and remove it
+    if [ "${params[$index]}" == "__node:=xela_server" ]; then
+        #printf "\nRemoving __node at index ${index}"
+        params=("${params[@]:0:$index}" "${params[@]:$((index+1))}")
+    fi
+done
+#printf "\n"
+
+# Build the filtered parameters
+filtered_params=("${params[@]}")
+
+# Print the command (for debugging purposes)
+# echo "Running command: xela_server ${params[@]}"
+
+done
+# Execute the command
+#xela_server "${filtered_params[@]}"
+
+```
+修改好脚本文件后运行以下代码即可将传感器消息发送在ROS中（期间需要一直保持xela_server运行）
+```bash
+roslaunch xela_server_ros service.launch
+```
+查看三维力数据话题消息
+```bash
+rostopic echo /xServTopic
+```
+一帧实际数据如下：
+```bash
+sensors: 
+  - 
+    message: 153032
+    time: 1740389044.0427728
+    model: "uSPa44"
+    sensor_pos: 1
+    taxels: 
+      - 
+        x: 32858
+        y: 33234
+        z: 39788
+      - 
+        x: 32661
+        y: 33433
+        z: 39629
+      - 
+        x: 32644
+        y: 33548
+        z: 39390
+      - 
+        x: 31979
+        y: 33276
+        z: 39970
+      - 
+        x: 33152
+        y: 32774
+        z: 39306
+      - 
+        x: 32834
+        y: 32783
+        z: 38624
+      - 
+        x: 32541
+        y: 32651
+        z: 38885
+      - 
+        x: 31877
+        y: 32592
+        z: 39237
+      - 
+        x: 33505
+        y: 32716
+        z: 39336
+      - 
+        x: 32721
+        y: 32727
+        z: 38644
+      - 
+        x: 32440
+        y: 32841
+        z: 38578
+      - 
+        x: 31889
+        y: 32505
+        z: 39097
+      - 
+        x: 32998
+        y: 32079
+        z: 39949
+      - 
+        x: 32437
+        y: 31955
+        z: 39290
+      - 
+        x: 32720
+        y: 32147
+        z: 39171
+      - 
+        x: 31898
+        y: 31992
+        z: 40205
+    forces: 
+      - 
+        x: -0.03092806786298752
+        y: 0.0524379126727581
+        z: -0.14542685449123383
+      - 
+        x: -0.07722348719835281
+        y: 0.049154724925756454
+        z: -0.1438504010438919
+      - 
+        x: -0.07646020501852036
+        y: 0.06444397568702698
+        z: -0.17931215465068817
+      - 
+        x: -0.03594706580042839
+        y: 0.032230209559202194
+        z: -0.022284358739852905
+      - 
+        x: -0.021287521347403526
+        y: 0.04371457174420357
+        z: -0.13328668475151062
+      - 
+        x: -0.03526858612895012
+        y: 0.03969043865799904
+        z: -0.08553791791200638
+      - 
+        x: -0.08842744678258896
+        y: 0.04939442500472069
+        z: -0.0504952073097229
+      - 
+        x: -0.09700527042150497
+        y: 0.04686717316508293
+        z: 0.002607047325000167
+      - 
+        x: -0.020337862893939018
+        y: -0.015915310010313988
+        z: -0.0781850814819336
+      - 
+        x: -0.02280968800187111
+        y: -0.04100397974252701
+        z: -0.07260633260011673
+      - 
+        x: -0.05311059206724167
+        y: 0.003898804308846593
+        z: -0.05655846744775772
+      - 
+        x: -0.07227180153131485
+        y: 0.03743838891386986
+        z: -0.04671410471200943
+      - 
+        x: -0.004585665185004473
+        y: -0.010053245350718498
+        z: -0.07978542894124985
+      - 
+        x: -0.04271174967288971
+        y: -0.016017258167266846
+        z: -0.053573671728372574
+      - 
+        x: 0.009421447291970253
+        y: -0.00914162490516901
+        z: -0.1028340756893158
+      - 
+        x: -0.07343057543039322
+        y: -0.0031491806730628014
+        z: 0.00609383312985301
+
+```
