@@ -2,10 +2,9 @@
 
 <!-- ## 一、环境准备 -->
 ### 创建工作空间与功能包
+安装依赖(安装后才能使用slcan)
 ```bash
-mkdir -p xela_ws/src
-cd xela_ws/src
-catkin_create_pkg xela_driver rospy roscpp sensor_msgs
+sudo apt install can-utils
 ```
 
 复制xela官网资料里的linux相关驱动代码,命名为 xela_linx/
