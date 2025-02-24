@@ -127,6 +127,7 @@ done
 
 ```
 修改好脚本文件后运行以下代码即可将传感器消息发送在ROS中（期间需要一直保持xela_server运行）
+长时间运行可能发生漂移，可重新启动xela_server和ROS服务
 ```bash
 roslaunch xela_server_ros service.launch
 ```
