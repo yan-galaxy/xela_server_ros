@@ -29,7 +29,7 @@ CMakeLists.txt  launch  LICENSE  msg  package.xml  readme.md  scripts  srv
 然后在xela_linx/下执行slcan_activate.sh脚本，激活CAN设备。
 执行成功后USB-CAN设备会亮绿灯
 ```bash
-sudo ./VScom_USB-CAN_Plus/install.sh
+sudo ./VScom_USB-CAN_Plus/install.sh #一般第一次配置正常后，后续不需要每次再执行
 sudo ./xela_linx/slcan_activate.sh 0
 ```
 在xela_linx/下执行xela_server脚本，
