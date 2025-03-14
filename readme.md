@@ -73,6 +73,7 @@ sudo ./xela_linx/xela_server
 ```
 另外开一个终端执行xela_linx/中xela_viz文件
 ，如正常则会显示三维力可视化界面(这两条命令比较迷，有时候必须都用sudo才能正常显示，有时候又不用，但是当xela_viz必须sudo才能显示时ROS节点是连接不到xela_server的)
+(发现似乎是联网的状态下需要开启网络代理clash之后才能不需要sudo就可以执行./xela_viz正常显示,从而可以在ROS中正常运行节点。而断网的时候不需要代理也能)
 ```bash
 sudo ./xela_linx/xela_viz
 ```
