@@ -72,7 +72,7 @@ sudo ./VScom_USB-CAN_Plus/install.sh #一般第一次配置正常后，后续不
 sudo ./xela_linx/xela_server
 ```
 另外开一个终端执行xela_linx/中xela_viz文件
-，如正常则会显示三维力可视化界面
+，如正常则会显示三维力可视化界面(这两条命令比较迷，有时候必须都用sudo才能正常显示，有时候又不用，但是当xela_viz必须sudo才能显示时ROS节点是连接不到xela_server的)
 ```bash
 sudo ./xela_linx/xela_viz
 ```
