@@ -46,6 +46,10 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+add_executable(xela_force_subscriber src/xela_force_subscriber.cpp)
+target_link_libraries(xela_force_subscriber ${catkin_LIBRARIES})
+add_dependencies(xela_force_subscriber ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 #############
 ## Install ##
 #############
